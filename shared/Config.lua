@@ -1,4 +1,4 @@
-
+Config = Config or {}
 Config.Consumables = {}
 
 Config.Consumables.drink = {

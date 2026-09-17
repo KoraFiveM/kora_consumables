@@ -97,3 +97,7 @@ for k, v in pairs (Config.Consumables) do
     end
 end
 Items = nil
+
+-- Register only after defaults have filled each consumable definition, so the
+-- editor sees the complete authored shape rather than the placeholder tables.
+if QB and QB.config and QB.config.adopt then Config = QB.config.adopt(Config) end

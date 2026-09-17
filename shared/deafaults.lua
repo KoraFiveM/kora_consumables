@@ -41,7 +41,7 @@ local defaults = {
         },
         status = {stress = -10, health = -5},
         disable = {move = true, combat = true, vehicle = true},
-        effects = 'alien'
+        effects = {visual = 'alien', duration = 15000}
     },
     liquor = {
         label = 'Drinking ',
@@ -58,7 +58,7 @@ local defaults = {
         },
         disable = {move = true, combat = true, vehicle = true},
         status = {drunk = 10},
-        effects = 'buzzed'
+        effects = {visual = 'buzzed', duration = 15000}
     }
 }
 
@@ -97,7 +97,3 @@ for k, v in pairs (Config.Consumables) do
     end
 end
 Items = nil
-
--- Register only after defaults have filled each consumable definition, so the
--- editor sees the complete authored shape rather than the placeholder tables.
-if QB and QB.config and QB.config.adopt then Config = QB.config.adopt(Config) end

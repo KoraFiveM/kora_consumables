@@ -5,12 +5,10 @@ author 'Kakarot'
 description 'its in the name, just read'
 version '1.2.1'
 
-dependency 'qblib'
 
-shared_scripts {
+shared_script {
     '@qblib/init.lua',
-    'shared/Config.lua',
-    'shared/deafaults.lua'
+    'shared/**.lua'
 }
 
 server_script 'server/**.lua'

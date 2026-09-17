@@ -25,13 +25,12 @@ end
 
 for category, v in pairs(Config.Consumables) do
     for item, data in pairs(v) do
-        exports.qbcore:createUseable(item, function(source, itemData)
+        exports['qb-core']:createUseable(item, function(source, itemData)
             local src = source
             local itemInfo = itemData.info
 
-            local progressbar = QB.callback.trigger('qbconsumables:progress', src, {class = category, item = item})
+            local progressbar = QB.callback.trigger(src,'qbconsumables:progress',  {class = category, item = item})
             if not progressbar then return end
-
             local remove = false
             if itemInfo and itemInfo.uses then
                 itemInfo.uses = itemInfo.uses - 1
@@ -47,7 +46,9 @@ for category, v in pairs(Config.Consumables) do
             end
 
             if remove then
-                if exports.qbinventory:removeItem(src, item, 1, itemData.slot) then
+                QB.print.debug(source, item ,1, exports['qb-inventory']:removeItem(source, item, 1))
+                if exports['qb-inventory']:removeItem(source, item, 1) then
+                    print("Item removed successfully:", item)
                     if data.status then
                         addStatus(src, data.status)
                     end
@@ -60,3 +61,4 @@ for category, v in pairs(Config.Consumables) do
         end)
     end
 end
+

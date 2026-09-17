@@ -1,20 +1,27 @@
 
 local function addVisuals(effect)
-    if not effect or effect == '' or effect == 'none' then return end
-    if effect == 'alien' then
-        QB.visuals.alien(15000)
-    elseif effect == 'coke' then
-        QB.visuals.coke(15000)
-    elseif effect == 'crack' then
-        QB.visuals.crack(15000)
-    elseif effect == 'meth' then
-        QB.visuals.meth(15000)
-    elseif effect == 'trevor' then
-        QB.visuals.trevor(15000)
+   if not effect then 
+       return
+   end
+   if effect.visual == 'none' then
+       return
+   end
+
+    if effect.visual == 'alien' then
+        QB.visuals.alien(effect.duration or 15000)
+    elseif effect.visual == 'coke' then
+        QB.visuals.coke(effect.duration or 15000)
+    elseif effect.visual == 'crack' then
+        QB.visuals.crack(effect.duration or 15000)
+    elseif effect.visual == 'meth' then
+        QB.visuals.meth(effect.duration or 15000)
+    elseif effect.visual == 'trevor' then
+        QB.visuals.trevor(effect.duration or 15000)
     end
 end
 
-QB.callback.register('qbconsumables:progress', function(source, data)
+QB.callback.register('qbconsumables:progress', function(data)
+    
     assert(data and data.class and data.item, "Invalid data passed to qbconsumables:progress")
     local itemData = Config.Consumables[data.class] and Config.Consumables[data.class][data.item] or nil
     if not itemData then

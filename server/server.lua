@@ -25,7 +25,7 @@ end
 
 for category, v in pairs(Config.Consumables) do
     for item, data in pairs(v) do
-        exports['qb-core']:createUseable(item, function(source, itemData)
+        exports.qbcore:createUseable(item, function(source, itemData)
             local src = source
             local itemInfo = itemData.info
 

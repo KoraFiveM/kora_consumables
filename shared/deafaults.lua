@@ -14,7 +14,7 @@ local defaults = {
             rotation = {x = 0.0, y = 0.0, z = 0.0}
         },
         disable = {move = true, combat = true, vehicle = true},
-        status = {thirst = 10}
+        status = {thirst = 20}
     },
     food = {
         label = 'Eating ',
@@ -30,7 +30,7 @@ local defaults = {
             rotation = {x = 0.0, y = 0.0, z = 0.0}
         },
         disable = {move = true, combat = true, vehicle = true},
-        status = {hunger = 10}
+        status = {hunger = 20}
     },
     smoke = {
         label = 'Smoking ',
@@ -57,7 +57,7 @@ local defaults = {
             rotation = {x = 0.0, y = 0.0, z = 0.0}
         },
         disable = {move = true, combat = true, vehicle = true},
-        status = {drunk = 10},
+        status = {thirst = 10},
         effects = {visual = 'buzzed', duration = 15000}
     }
 }

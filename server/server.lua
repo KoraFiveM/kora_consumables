@@ -44,11 +44,8 @@ for category, v in pairs(Config.Consumables) do
             if not data.keep then
                 remove = true
             end
-
             if remove then
-                QB.print.debug(source, item ,1, exports['qb-inventory']:removeItem(source, item, 1))
-                if exports['qb-inventory']:removeItem(source, item, 1) then
-                    print("Item removed successfully:", item)
+                if exports.qbinventory:removeItem(source, item, 1) then
                     if data.status then
                         addStatus(src, data.status)
                     end

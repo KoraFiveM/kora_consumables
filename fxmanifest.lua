@@ -5,6 +5,7 @@ author 'Kakarot'
 description 'its in the name, just read'
 version '1.2.1'
 
+dependency 'qblib'
 
 shared_script {
     '@qblib/init.lua',

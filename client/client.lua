@@ -21,7 +21,6 @@ local function addVisuals(effect)
 end
 
 QB.callback.register('qbconsumables:progress', function(data)
-    
     assert(data and data.class and data.item, "Invalid data passed to qbconsumables:progress")
     local itemData = Config.Consumables[data.class] and Config.Consumables[data.class][data.item] or nil
     if not itemData then
@@ -34,6 +33,7 @@ QB.callback.register('qbconsumables:progress', function(data)
         canCancel = itemData.canCancel or true,
         anim = itemData.anim or nil,
         prop = itemData.prop or nil,
+        emote = itemData.emote or nil,
         disable = itemData.disableMovement or false,
     })
     if itemData.effects and progress then

@@ -8,10 +8,10 @@ local defaults = {
             clip = "loop_bottle"
         },
         prop = {
-            model = "prop_cs_bottle_01",
+            model = "prop_ld_flow_bottle",
             bone = 28422,
-            offset = {x = 0.0, y = 0.0, z = 0.0},
-            rotation = {x = 0.0, y = 0.0, z = 0.0}
+            offset = {x = 0.12, y = 0.008, z = 0.03},
+            rotation = {x = 240.0, y = -60.0, z = 0.0}
         },
         disable = {move = true, combat = true, vehicle = true},
         status = {thirst = 20}
@@ -20,14 +20,15 @@ local defaults = {
         label = 'Eating ',
         duration = 4000,
         anim = {
-            dict = "mp_player_inteat",
-            clip = "loop_bite"
+            dict = "mp_player_inteat@burger",
+            clip = "mp_player_int_eat_burger",
+            flag = 49
         },
         prop = {
-            model = "prop_cs_burger_01",
+            model = "60309",
             bone = 28422,
-            offset = {x = 0.0, y = 0.0, z = 0.0},
-            rotation = {x = 0.0, y = 0.0, z = 0.0}
+            offset = {x = 0.0, y = 0.0, z = -0.02},
+            rotation = {x = 30.0, y = 0.0, z = 0.0}
         },
         disable = {move = true, combat = true, vehicle = true},
         status = {hunger = 20}
@@ -47,13 +48,13 @@ local defaults = {
         label = 'Drinking ',
         duration = 4000,
         anim = {
-            dict = "mp_player_intdrink",
-            clip = "loop_bottle"
+            dict = "amb@world_human_drinking@coffee@male@idle_a",
+            clip = "idle_c"
         },
         prop = {
             model = "prop_cs_bottle_01",
             bone = 28422,
-            offset = {x = 0.0, y = 0.0, z = 0.0},
+            offset = {x = 0.01, y = -0.01, z = -0.06},
             rotation = {x = 0.0, y = 0.0, z = 0.0}
         },
         disable = {move = true, combat = true, vehicle = true},

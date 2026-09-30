@@ -34,7 +34,7 @@ for category, v in pairs(Config.Consumables) do
             local remove = false
             if itemInfo and itemInfo.uses then
                 itemInfo.uses = itemInfo.uses - 1
-                exports['qb-inventory']:SetItemData(src, item, 'info', itemInfo)
+                exports['qb-inventory']:SetItemData(src, item, 'info', itemInfo, itemData.slot)
                 if itemInfo.uses <= 0 then
                     remove = true
                 end
@@ -45,7 +45,7 @@ for category, v in pairs(Config.Consumables) do
                 remove = true
             end
             if remove then
-                if exports.qbinventory:removeItem(source, item, 1) then
+                if exports.qbinventory:removeItem(source, item, 1, itemData.slot) then
                     if data.status then
                         addStatus(src, data.status)
                     end

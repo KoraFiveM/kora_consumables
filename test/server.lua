@@ -8,6 +8,7 @@ end
 
 local handlers, items, updates, removals, statuses = {}, {}, {}, {}, {}
 local progress = true
+local metadataAccepted, removeAccepted = true, true
 exports = {
     qbcore = {
         createUseable = function(_, name, callback) handlers[name] = callback end,
@@ -19,6 +20,7 @@ exports = {
     ['qb-inventory'] = {
         SetItemData = function(_, src, name, key, value, slot)
             updates[#updates + 1] = { src = src, name = name, key = key, slot = slot }
+            if not metadataAccepted then return metadataAccepted end
             local target = items[slot or 1]
             if not target or target.name ~= name then return false end
             target[key] = value
@@ -28,6 +30,7 @@ exports = {
     qbinventory = {
         removeItem = function(_, src, name, amount, slot)
             removals[#removals + 1] = { src = src, name = name, amount = amount, slot = slot }
+            if not removeAccepted then return false end
             local target = items[slot or 1]
             if not target or target.name ~= name then return false end
             items[slot or 1] = nil
@@ -93,4 +96,65 @@ equal(#updates, 0, 'cancelled progress cannot update metadata')
 equal(#removals, 0)
 equal(#statuses, 0)
 equal(items[2].info.uses, 2)
+
+progress = true
+local definition = Config.Consumables.food.sandwich
+for _, keep in ipairs({ false, true }) do
+    definition.keep = keep
+    seed(2)
+    use(2)
+    equal(items[2].info.uses, 1)
+    equal(#removals, 0, 'first use retains item even when keep is false')
+    equal(#statuses, 1, 'retained use applies its effect')
+    equal(statuses[1].src, 17)
+    equal(statuses[1].key, 'hunger')
+    equal(statuses[1].amount, 20)
+    equal(statuses[1].low, 0)
+    equal(statuses[1].high, 100)
+    use(2)
+    equal(items[2], nil, 'final use removes exhausted item even when keep is true')
+    equal(items[1].info.uses, 9)
+    equal(#removals, 1)
+    equal(removals[1].slot, 2)
+    equal(#statuses, 2, 'final use applies its effect once')
+    equal(statuses[2].amount, 20)
+
+    seed(nil)
+    use(2)
+    equal(#updates, 0, 'ordinary items do not acquire a uses counter')
+    equal(#statuses, 1)
+    if keep then
+        equal(#removals, 0, 'ordinary keep items remain reusable')
+        equal(items[2].info.note, 'second')
+    else
+        equal(#removals, 1, 'ordinary single-use item remains consumed')
+        equal(items[2], nil)
+    end
+end
+definition.keep = nil
+
+for _, failure in ipairs({ 'false', 'nil' }) do
+    seed(2)
+    if failure == 'false' then metadataAccepted = false else metadataAccepted = nil end
+    use(2)
+    equal(items[2].info.uses, 2, 'failed metadata write cannot consume a use')
+    equal(#statuses, 0, 'failed metadata write must not grant effects')
+    equal(#removals, 0)
+end
+metadataAccepted = true
+
+seed(1)
+removeAccepted = false
+use(2)
+equal(#removals, 1)
+equal(items[2].info.uses, 0)
+equal(#statuses, 0, 'failed final removal retains existing no-effect behavior')
+removeAccepted = true
+
+seed(2)
+progress = nil
+use(2)
+equal(#updates, 0, 'missing progress result is rejected')
+equal(#removals, 0)
+equal(#statuses, 0)
 print(('qbconsumables server: %d checks passed'):format(checks))

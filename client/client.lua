@@ -27,16 +27,22 @@ QB.callback.register('qbconsumables:progress', function(data)
         return false
     end
     local prop = itemData.prop
+    local disable = itemData.disable
+    if disable == nil then disable = itemData.disableMovement or false end
+    if type(disable) == 'table' and disable.vehicle ~= nil and disable.car == nil then
+        disable = QB.util.deepClone(disable)
+        disable.car = disable.vehicle
+    end
     local progress = QB.progressbar.start({
         label = itemData.label or "Using item",
         duration = itemData.duration or 1000,
         useWhileDead = itemData.useWhileDead or false,
-        canCancel = itemData.canCancel or true,
+        canCancel = itemData.canCancel == nil or itemData.canCancel,
         anim = itemData.anim or nil,
         prop = prop and prop.coords and prop or nil,
         props = prop and not prop.coords and { prop } or nil,
         emote = itemData.emote or nil,
-        disable = itemData.disableMovement or false,
+        disable = disable,
     })
     if itemData.effects and progress then
         addVisuals(itemData.effects)

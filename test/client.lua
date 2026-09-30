@@ -16,6 +16,11 @@ QB = {
     end },
     progressbar = { start = function(options) payload = options; return completed end },
     visuals = {},
+    util = { deepClone = function(flags)
+        local copy = {}
+        for key, value in pairs(flags) do copy[key] = value end
+        return copy
+    end },
 }
 for _, name in ipairs({ 'alien', 'coke', 'crack', 'meth', 'trevor' }) do
     QB.visuals[name] = function(duration) visuals[#visuals + 1] = { name = name, duration = duration } end
@@ -31,6 +36,13 @@ for _, input in ipairs({ { 'drink', 'water' }, { 'food', 'sandwich' }, { 'smoke'
     equal(payload.label, definition.label)
     equal(payload.duration, definition.duration)
     equal(payload.anim, definition.anim)
+    equal(payload.canCancel, true, 'default remains cancellable')
+    equal(type(payload.disable), 'table', 'configured control restrictions are forwarded')
+    equal(payload.disable.move, true)
+    equal(payload.disable.combat, true)
+    equal(payload.disable.car, true, 'existing vehicle flag reaches the car API')
+    equal(payload.disable.vehicle, true, 'existing flag is retained in the payload')
+    equal(definition.disable.car, nil, 'alias conversion does not mutate defaults')
     equal(payload.prop, nil, 'offset-based default is not sent as a legacy prop')
     if definition.prop then
         equal(#payload.props, 1)
@@ -73,4 +85,46 @@ equal(visuals[1].duration, 15000)
 payload = nil
 equal(callback({ class = 'unknown', item = 'unknown' }), false)
 equal(payload, nil, 'unknown consumable does not start progress')
+
+local custom = {
+    label = 'Custom', duration = 1234, useWhileDead = true, canCancel = false,
+    anim = { dict = 'custom', clip = 'loop' }, emote = 'custom',
+    disable = { move = true, combat = false, vehicle = true, car = false, sprint = true, mouse = true },
+    disableMovement = { move = false, combat = true },
+}
+Config.Consumables.food.custom = custom
+local function callCustom() return callback({ class = 'food', item = 'custom' }) end
+equal(callCustom(), true)
+equal(payload.canCancel, false, 'explicit cancellation setting is preserved')
+equal(payload.disable, custom.disable, 'explicit car flag needs no conversion')
+equal(payload.disable.car, false, 'explicit car=false overrides vehicle=true')
+equal(payload.disable.sprint, true)
+equal(payload.disable.mouse, true)
+for _, key in ipairs({ 'label', 'duration', 'useWhileDead', 'anim', 'emote' }) do
+    equal(payload[key], custom[key], 'other progress option is preserved')
+end
+custom.disable.car = nil
+callCustom()
+equal(payload.disable == custom.disable, false, 'vehicle alias uses a separate table')
+equal(payload.disable.car, true)
+equal(payload.disable.combat, false)
+equal(custom.disable.car, nil, 'custom configuration remains unchanged')
+custom.disable = false
+callCustom()
+equal(payload.disable, false, 'explicit no-controls setting takes precedence over legacy fallback')
+custom.disable = nil
+callCustom()
+equal(payload.disable, custom.disableMovement, 'legacy restriction table still works')
+custom.disableMovement = nil
+callCustom()
+equal(payload.disable, false, 'absent restrictions remain false')
+custom.canCancel = nil
+callCustom()
+equal(payload.canCancel, true)
+custom.canCancel = true
+callCustom()
+equal(payload.canCancel, true)
+custom.canCancel = 0
+callCustom()
+equal(payload.canCancel, 0, 'invalid option remains available to library validation')
 print(('qbconsumables client: %d checks passed'):format(checks))

@@ -63,8 +63,6 @@ local defaults = {
     }
 }
 
-local Items = exports['qb-core']:GetShared('Items')
-
 if not Config.Consumables then
     repeat
         Wait(20)
@@ -75,7 +73,8 @@ for k, v in pairs (Config.Consumables) do
     local default = defaults[k]
     for item, data in pairs(v) do
         if not data.label then
-            data.label = default.label .. (Items[item] and Items[item].label or "")
+            local definition = exports.qbcore:getShared('items', item)
+            data.label = default.label .. (definition and definition.label or "")
         end
         if not data.duration then
             data.duration = default.duration
@@ -97,4 +96,3 @@ for k, v in pairs (Config.Consumables) do
         end
     end
 end
-Items = nil

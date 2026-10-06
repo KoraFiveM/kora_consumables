@@ -11,12 +11,12 @@ local progress = true
 local metadataAccepted, removeAccepted = true, true
 exports = {
     qbcore = {
+        getShared = function(_, name) equal(name, 'items'); return nil end,
         createUseable = function(_, name, callback) handlers[name] = callback end,
         incrementMetaData = function(_, src, key, amount, low, high)
             statuses[#statuses + 1] = { src = src, key = key, amount = amount, low = low, high = high }
         end,
     },
-    ['qb-core'] = { GetShared = function(_, name) equal(name, 'Items'); return {} end },
     ['qb-inventory'] = {
         SetItemData = function(_, src, name, key, value, slot)
             updates[#updates + 1] = { src = src, name = name, key = key, slot = slot }

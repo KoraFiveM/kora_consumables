@@ -73,7 +73,7 @@ for k, v in pairs (Config.Consumables) do
     local default = defaults[k]
     for item, data in pairs(v) do
         if not data.label then
-            local definition = exports.qbcore:getShared('items', item)
+            local definition = exports.kora_core:getShared('items', item)
             data.label = default.label .. (definition and definition.label or "")
         end
         if not data.duration then

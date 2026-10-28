@@ -8,7 +8,7 @@ end
 local callback, payload
 local completed = true
 local visuals = {}
-exports = { qbcore = { getShared = function() return {} end } }
+exports = { kora_core = { getShared = function() return {} end } }
 QB = {
     callback = { register = function(name, handler)
         equal(name, 'qbconsumables:progress')

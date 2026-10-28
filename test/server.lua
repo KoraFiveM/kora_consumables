@@ -10,7 +10,7 @@ local handlers, items, updates, removals, statuses = {}, {}, {}, {}, {}
 local progress = true
 local metadataAccepted, removeAccepted = true, true
 exports = {
-    qbcore = {
+    kora_core = {
         getShared = function(_, name) equal(name, 'items'); return nil end,
         createUseable = function(_, name, callback) handlers[name] = callback end,
         incrementMetaData = function(_, src, key, amount, low, high)
@@ -27,7 +27,7 @@ exports = {
             return true
         end,
     },
-    qbinventory = {
+    kora_inventory = {
         removeItem = function(_, src, name, amount, slot)
             removals[#removals + 1] = { src = src, name = name, amount = amount, slot = slot }
             if not removeAccepted then return false end

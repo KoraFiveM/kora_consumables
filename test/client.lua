@@ -6,15 +6,21 @@ local function equal(actual, expected, message)
     checks = checks + 1
 end
 local callback, payload
+
 local completed = true
 local visuals = {}
+local events = {}
 exports = { kora_core = { getShared = function() return {} end } }
 QB = {
     callback = { register = function(name, handler)
         equal(name, 'qbconsumables:progress')
         callback = handler
     end },
-    progressbar = { start = function(options) payload = options; return completed end },
+    config = {
+        enum = function(value, options) return { value = value, options = options } end,
+        adopt = function(config) return config end,
+    },
+    progressbar = { start = function(options) payload = options; events[#events + 1] = 'progress'; return completed end },
     visuals = {},
     util = { deepClone = function(flags)
         local copy = {}
@@ -23,11 +29,20 @@ QB = {
     end },
 }
 for _, name in ipairs({ 'alien', 'coke', 'crack', 'meth', 'trevor' }) do
-    QB.visuals[name] = function(duration) visuals[#visuals + 1] = { name = name, duration = duration } end
+    QB.visuals[name] = function(duration) events[#events + 1] = 'visual'; visuals[#visuals + 1] = { name = name, duration = duration } end
 end
 dofile('shared/Config.lua')
 dofile('shared/deafaults.lua')
 dofile('client/client.lua')
+
+-- adopt() is a pass-through in this harness, so the enum descriptor is still visible.
+local setting = Config.applyStatusOn
+equal(setting.value, 'complete', 'effects default to applying on completion')
+equal(setting.options.live, true)
+equal(type(setting.options.label), 'string')
+equal(type(setting.options.description), 'string')
+equal(setting.options.options[1].value, 'complete')
+equal(setting.options.options[2].value, 'start')
 
 for _, input in ipairs({ { 'drink', 'water' }, { 'food', 'sandwich' }, { 'smoke', 'ak47_joint' }, { 'liquor', 'beer' } }) do
     local class, item = input[1], input[2]
@@ -82,6 +97,14 @@ completed = true
 equal(callback({ class = 'smoke', item = 'ak47_joint' }), true)
 equal(visuals[1].name, 'alien')
 equal(visuals[1].duration, 15000)
+payload = nil
+events = {}
+equal(callback({ class = 'smoke', item = 'ak47_joint' }), true)
+equal(events[1], 'progress', 'callback only replies after the blocking progress call returns')
+equal(events[2], 'visual', 'visuals follow a completed progress')
+equal(#events, 2)
+equal(payload.duration, Config.Consumables.smoke.ak47_joint.duration, 'progress runs for the full configured duration')
+equal(payload.anim, Config.Consumables.smoke.ak47_joint.anim, 'animation is owned by the progress bar so it ends with it')
 payload = nil
 equal(callback({ class = 'unknown', item = 'unknown' }), false)
 equal(payload, nil, 'unknown consumable does not start progress')

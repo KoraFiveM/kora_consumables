@@ -38,13 +38,23 @@ exports = {
         end,
     },
 }
-QB = { callback = { trigger = function(src, name, payload)
-    equal(src, 17)
-    equal(name, 'qbconsumables:progress')
-    equal(payload.class, 'food')
-    equal(payload.item, 'sandwich')
-    return progress
-end } }
+local clock, elapsed, duringProgress = 0, 4000, nil
+GetGameTimer = function() return clock end
+QB = {
+    config = {
+        enum = function(value) return value end,
+        adopt = function(config) return config end,
+    },
+    callback = { trigger = function(src, name, payload)
+        equal(src, 17)
+        equal(name, 'qbconsumables:progress')
+        equal(payload.class, 'food')
+        equal(payload.item, 'sandwich')
+        if duringProgress then duringProgress() end
+        clock = clock + elapsed
+        return progress
+    end },
+}
 dofile('shared/Config.lua')
 dofile('shared/deafaults.lua')
 dofile('server/server.lua')
@@ -157,4 +167,93 @@ use(2)
 equal(#updates, 0, 'missing progress result is rejected')
 equal(#removals, 0)
 equal(#statuses, 0)
+-- Effect timing and the per-player guard.
+progress = true
+definition = Config.Consumables.food.sandwich
+equal(Config.applyStatusOn, 'complete', 'default waits for the use to finish')
+
+seed(nil)
+local statusAtProgress
+duringProgress = function() statusAtProgress = #statuses + #removals end
+use(2)
+equal(statusAtProgress, 0, 'nothing is applied or consumed while the animation runs')
+equal(#statuses, 1, 'status applied once the use completes')
+duringProgress = nil
+
+seed(nil)
+progress = false
+use(2)
+equal(#statuses, 0, 'cancel applies no status')
+equal(#removals, 0, 'cancel does not consume the item')
+progress = true
+
+seed(nil)
+elapsed = 100
+use(2)
+equal(#statuses, 0, 'a reply faster than the duration is ignored')
+equal(#removals, 0)
+elapsed = definition.duration - 100
+use(2)
+equal(#statuses, 1, 'timer granularity allowance still accepts a real use')
+elapsed = 4000
+
+seed(nil)
+local secondResult, secondRan
+duringProgress = function()
+    if secondRan then return end
+    secondRan = true
+    secondResult = handlers.sandwich(17, { name = 'sandwich', slot = 2, info = {} })
+end
+use(2)
+duringProgress = nil
+equal(secondResult, false, 'second use during an active use is rejected')
+equal(#statuses, 1, 'rejected use does not stack the effect')
+equal(#removals, 1)
+seed(nil)
+use(2)
+equal(#statuses, 1, 'guard is released after a completed use')
+
+seed(nil)
+duringProgress = function() error('boom') end
+equal(pcall(handlers.sandwich, 17, { name = 'sandwich', slot = 2, info = {} }), false)
+duringProgress = nil
+use(2)
+equal(#statuses, 1, 'guard is released after an error')
+
+seed(nil)
+progress = false
+use(2)
+progress = true
+use(2)
+equal(#statuses, 1, 'guard is released after a cancel')
+
+Config.applyStatusOn = 'start'
+seed(nil)
+statusAtProgress = nil
+duringProgress = function() statusAtProgress = #statuses + #removals end
+use(2)
+equal(statusAtProgress, 2, 'start mode applies the effect and consumes before the animation')
+equal(#statuses, 1)
+equal(#removals, 1)
+progress = false
+seed(nil)
+duringProgress = nil
+use(2)
+equal(#statuses, 1, 'start mode keeps the effect even if the animation is cancelled')
+elapsed = 0
+progress = true
+seed(nil)
+use(2)
+equal(#statuses, 1, 'start mode ignores the reply timing')
+secondRan, secondResult = false, nil
+seed(nil)
+duringProgress = function()
+    if secondRan then return end
+    secondRan = true
+    secondResult = handlers.sandwich(17, { name = 'sandwich', slot = 2, info = {} })
+end
+use(2)
+equal(secondResult, false, 'start mode also rejects a concurrent use')
+Config.applyStatusOn = 'complete'
+
 print(('qbconsumables server: %d checks passed'):format(checks))

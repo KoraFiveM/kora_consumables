@@ -23,37 +23,68 @@ local function addStatus(src, status)
     end
 end
 
+-- Allowance for timer granularity when checking the reported duration.
+local FINISH_TOLERANCE = 250
+
+-- Players with a use in flight. A use spans a client round trip, so without this
+-- a second use would run alongside the first and stack its effect.
+local using = {}
+
+-- Returns true when the item was consumed (or kept) and its status may apply.
+local function takeItem(src, item, data, itemData)
+    local itemInfo = itemData.info
+    local remove = false
+    if itemInfo and itemInfo.uses then
+        itemInfo.uses = itemInfo.uses - 1
+        local updated = exports['qb-inventory']:SetItemData(src, item, 'info', itemInfo, itemData.slot)
+        if not updated then return false end
+        remove = itemInfo.uses <= 0
+    elseif not data.keep then
+        remove = true
+    end
+    if remove then
+        return exports.kora_inventory:removeItem(src, item, 1, itemData.slot) and true or false
+    end
+    return true
+end
+
+local function useConsumable(src, category, item, data, itemData)
+    local payload = {class = category, item = item}
+
+    if Config.applyStatusOn == 'start' then
+        if takeItem(src, item, data, itemData) and data.status then
+            addStatus(src, data.status)
+        end
+        QB.callback.trigger(src, 'qbconsumables:progress', payload)
+        return
+    end
+
+    local startedAt = GetGameTimer()
+    local progressbar = QB.callback.trigger(src, 'qbconsumables:progress', payload)
+    if not progressbar then return end
+
+    -- The client reports its own result, so a modified client could answer at once.
+    -- A real use cannot come back before the progress duration has elapsed.
+    if GetGameTimer() - startedAt < (data.duration or 1000) - FINISH_TOLERANCE then
+        print(('[kora_consumables] %s used %s faster than its %sms duration; ignored'):format(src, item, data.duration or 1000))
+        return
+    end
+
+    if takeItem(src, item, data, itemData) and data.status then
+        addStatus(src, data.status)
+    end
+end
+
 for category, v in pairs(Config.Consumables) do
     for item, data in pairs(v) do
         exports.kora_core:createUseable(item, function(source, itemData)
             local src = source
-            local itemInfo = itemData.info
+            if using[src] then return false end
 
-            local progressbar = QB.callback.trigger(src,'qbconsumables:progress',  {class = category, item = item})
-            if not progressbar then return end
-            local remove = false
-            if itemInfo and itemInfo.uses then
-                itemInfo.uses = itemInfo.uses - 1
-                local updated = exports['qb-inventory']:SetItemData(src, item, 'info', itemInfo, itemData.slot)
-                if not updated then return end
-                if itemInfo.uses <= 0 then
-                    remove = true
-                end
-            elseif not data.keep then
-                remove = true
-            end
-            if remove then
-                if exports.kora_inventory:removeItem(source, item, 1, itemData.slot) then
-                    if data.status then
-                        addStatus(src, data.status)
-                    end
-                end
-            else
-                if data.status then
-                    addStatus(src, data.status)
-                end
-            end
+            using[src] = true
+            local ok, err = pcall(useConsumable, src, category, item, data, itemData)
+            using[src] = nil
+            if not ok then error(err, 0) end
         end)
     end
 end
-

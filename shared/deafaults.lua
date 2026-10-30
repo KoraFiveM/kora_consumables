@@ -96,3 +96,17 @@ for k, v in pairs (Config.Consumables) do
         end
     end
 end
+
+-- 'complete' applies the item effect (and consumes the item) only once the use
+-- animation finishes; 'start' is the old behaviour of applying it up front.
+Config.applyStatusOn = QB.config.enum(Config.applyStatusOn or 'complete', {
+    live = true,
+    label = 'Apply effects when',
+    description = 'Chooses when a consumable takes effect and is used up. Finished applies hunger, thirst and other effects only after the eating, drinking or smoking animation completes, and a cancelled use consumes nothing. Start applies them the moment the item is used, before the animation, and cancelling does not undo them.',
+    options = {
+        { value = 'complete', label = 'Finished' },
+        { value = 'start', label = 'Start' },
+    },
+})
+
+Config = QB.config.adopt(Config)

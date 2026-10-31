@@ -40,7 +40,7 @@ exports = {
 }
 local clock, elapsed, duringProgress = 0, 4000, nil
 GetGameTimer = function() return clock end
-QB = {
+Kora = {
     config = {
         enum = function(value) return value end,
         adopt = function(config) return config end,

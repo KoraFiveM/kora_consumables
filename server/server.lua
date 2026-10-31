@@ -55,12 +55,12 @@ local function useConsumable(src, category, item, data, itemData)
         if takeItem(src, item, data, itemData) and data.status then
             addStatus(src, data.status)
         end
-        QB.callback.trigger(src, 'qbconsumables:progress', payload)
+        Kora.callback.trigger(src, 'qbconsumables:progress', payload)
         return
     end
 
     local startedAt = GetGameTimer()
-    local progressbar = QB.callback.trigger(src, 'qbconsumables:progress', payload)
+    local progressbar = Kora.callback.trigger(src, 'qbconsumables:progress', payload)
     if not progressbar then return end
 
     -- The client reports its own result, so a modified client could answer at once.

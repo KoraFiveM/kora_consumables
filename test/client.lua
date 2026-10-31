@@ -11,7 +11,7 @@ local completed = true
 local visuals = {}
 local events = {}
 exports = { kora_core = { getShared = function() return {} end } }
-QB = {
+Kora = {
     callback = { register = function(name, handler)
         equal(name, 'qbconsumables:progress')
         callback = handler
@@ -29,7 +29,7 @@ QB = {
     end },
 }
 for _, name in ipairs({ 'alien', 'coke', 'crack', 'meth', 'trevor' }) do
-    QB.visuals[name] = function(duration) events[#events + 1] = 'visual'; visuals[#visuals + 1] = { name = name, duration = duration } end
+    Kora.visuals[name] = function(duration) events[#events + 1] = 'visual'; visuals[#visuals + 1] = { name = name, duration = duration } end
 end
 dofile('shared/Config.lua')
 dofile('shared/deafaults.lua')

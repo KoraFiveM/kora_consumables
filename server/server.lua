@@ -50,7 +50,7 @@ end
 
 local function applyUse(src, item, data, itemData)
     if not takeItem(src, item, data, itemData) then return end
-    if data.status then addStatus(src, data.status) end
+    addStatus(src, data.status)
     if data.event then TriggerClientEvent(data.event, src, item) end
 end
 

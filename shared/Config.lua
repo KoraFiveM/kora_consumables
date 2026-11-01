@@ -39,9 +39,12 @@ Config.Consumables.drink = {
     },
     -- Also handled instantly by kora_inventory; listed so they get the progress bar.
     water_bottle = {status = {thirst = 40}, prop = {offset = {x = 0.0, y = 0.0, z = -0.03}, rotation = {x = 0.0, y = 0.0, z = 0.0}}},
-    -- Can pulled back into the palm; the zero offset left it floating at the fingertips.
+    -- Same placement as the common 'soda' emote (rpemotes/dpemotes): the coffee idle_c animation with the
+    -- can on SKEL_R_Hand 28422, rotated 130 on z, so the hand wraps the can.
     soda = {
-        prop = {model = "prop_ecola_can", offset = {x = 0.0, y = 0.0, z = -0.06}, rotation = {x = 0.0, y = 0.0, z = 0.0}},
+        anim = {dict = "amb@world_human_drinking@coffee@male@idle_a", clip = "idle_c"},
+        prop = {model = "prop_ecola_can", bone = 28422,
+            offset = {x = 0.0, y = 0.0, z = 0.0}, rotation = {x = 0.0, y = 0.0, z = 130.0}},
         status = {thirst = 25, stress = -3},
     },
 }

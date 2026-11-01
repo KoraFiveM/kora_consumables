@@ -177,7 +177,7 @@ for class, items in pairs(Config.Consumables) do
     for item, data in pairs(items) do
         if data.prop then
             equal(validModels[data.prop.model], true, class .. '.' .. item .. ' prop model is valid')
-            equal(data.prop.bone, (class == 'liquor' or item == 'coffee') and 28422 or 60309, class .. '.' .. item .. ' prop is on the hand the animation uses')
+            equal(data.prop.bone, (class == 'liquor' or item == 'coffee' or item == 'soda') and 28422 or 60309, class .. '.' .. item .. ' prop is on the hand the animation uses')
             equal(type(data.prop.offset), 'table', class .. '.' .. item .. ' has an offset')
             equal(type(data.prop.rotation), 'table', class .. '.' .. item .. ' has a rotation')
         end
@@ -254,11 +254,13 @@ print(('qbconsumables movement: %d checks passed'):format(checks))
 
 -- Per-item offsets: soda and the other drink/food items carry non-zero attachments, coffee reuses the emote menu placement.
 local function nonZero(v) return v.x ~= 0.0 or v.y ~= 0.0 or v.z ~= 0.0 end
-for _, ref in ipairs({ { 'drink', 'soda' }, { 'drink', 'water' }, { 'food', 'sandwich' }, { 'food', 'bread' }, { 'food', 'chocolate_bar' } }) do
+for _, ref in ipairs({ { 'drink', 'water' }, { 'food', 'sandwich' }, { 'food', 'bread' }, { 'food', 'chocolate_bar' } }) do
     equal(nonZero(Config.Consumables[ref[1]][ref[2]].prop.offset), true, ref[2] .. ' has a non-zero offset')
     equal(Config.Consumables[ref[1]][ref[2]].prop.bone, 60309, ref[2] .. ' keeps the left hand bone')
 end
 equal(Config.Consumables.drink.soda.prop.model, 'prop_ecola_can', 'soda keeps its model')
+equal(Config.Consumables.drink.soda.prop.bone, 28422, 'soda can is on the right hand like the soda emote')
+equal(Config.Consumables.drink.soda.prop.rotation.z, 130.0, 'soda can rotation matches the soda emote')
 local cup = Config.Consumables.drink.coffee
 equal(cup.prop.bone, 28422, 'coffee cup is on the right hand like the emote menu')
 equal(cup.prop.rotation.z, 130.0, 'coffee cup rotation matches the emote menu')

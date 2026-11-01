@@ -75,16 +75,27 @@ local function useConsumable(src, category, item, data, itemData)
     end
 end
 
-for category, v in pairs(Config.Consumables) do
-    for item, data in pairs(v) do
-        exports.kora_core:createUseable(item, function(source, itemData)
-            local src = source
-            if using[src] then return false end
+local function registerUseables()
+    for category, v in pairs(Config.Consumables) do
+        for item, data in pairs(v) do
+            exports.kora_core:createUseable(item, function(source, itemData)
+                local src = source
+                if using[src] then return false end
 
-            using[src] = true
-            local ok, err = pcall(useConsumable, src, category, item, data, itemData)
-            using[src] = nil
-            if not ok then error(err, 0) end
-        end)
+                using[src] = true
+                local ok, err = pcall(useConsumable, src, category, item, data, itemData)
+                using[src] = nil
+                if not ok then error(err, 0) end
+            end)
+        end
     end
 end
+
+registerUseables()
+
+-- kora_inventory ships instant built-in handlers for some of the same items
+-- (water_bottle, sandwich, beer...). Its handlers register when it starts, so a
+-- later inventory (re)start would replace ours; register again to keep ours.
+AddEventHandler('onResourceStart', function(resource)
+    if resource == 'kora_inventory' then registerUseables() end
+end)

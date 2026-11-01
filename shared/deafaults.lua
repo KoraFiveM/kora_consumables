@@ -8,10 +8,12 @@ local defaults = {
             clip = "loop_bottle"
         },
         prop = {
+            -- Right hand (PH_R_Hand), the hand mp_player_intdrink raises to the mouth.
+            -- Offsets mirror the kora_emotemenu coffee attachment on the same bone.
             model = "prop_ld_flow_bottle",
             bone = 28422,
-            offset = {x = 0.12, y = 0.008, z = 0.03},
-            rotation = {x = 240.0, y = -60.0, z = 0.0}
+            offset = {x = 0.0, y = 0.0, z = 0.0},
+            rotation = {x = 0.0, y = 0.0, z = 130.0}
         },
         disable = {move = true, combat = true, vehicle = true},
         status = {thirst = 20}
@@ -25,10 +27,12 @@ local defaults = {
             flag = 49
         },
         prop = {
-            model = "60309",
+            -- 60309 is a bone id (PH_L_Hand), not a model name, so the old prop never loaded.
+            -- Right hand (PH_R_Hand) is the hand mp_player_inteat@burger brings to the mouth.
+            model = "prop_cs_burger_01",
             bone = 28422,
-            offset = {x = 0.0, y = 0.0, z = -0.02},
-            rotation = {x = 30.0, y = 0.0, z = 0.0}
+            offset = {x = 0.0, y = 0.0, z = 0.0},
+            rotation = {x = 0.0, y = 0.0, z = 130.0}
         },
         disable = {move = true, combat = true, vehicle = true},
         status = {hunger = 20}
@@ -52,7 +56,7 @@ local defaults = {
             clip = "idle_c"
         },
         prop = {
-            model = "prop_cs_bottle_01",
+            model = "prop_cs_beer_bot_01",
             bone = 28422,
             offset = {x = 0.01, y = -0.01, z = -0.06},
             rotation = {x = 0.0, y = 0.0, z = 0.0}
@@ -82,8 +86,14 @@ for k, v in pairs (Config.Consumables) do
         if not data.anim then
             data.anim = default.anim
         end
-        if not data.prop then
+        if data.prop == nil then
             data.prop = default.prop
+        elseif type(data.prop) == "table" and not data.prop.coords and default.prop then
+            -- A partial prop (for example only a model) inherits the class bone, offset and rotation.
+            local merged = {}
+            for key, value in pairs(default.prop) do merged[key] = value end
+            for key, value in pairs(data.prop) do merged[key] = value end
+            data.prop = merged
         end
         if not data.disable then
             data.disable = default.disable

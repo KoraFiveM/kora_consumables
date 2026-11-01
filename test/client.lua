@@ -7,6 +7,22 @@ local function equal(actual, expected, message)
 end
 local callback, payload
 
+-- Model validity is emulated: only these names are real models; joaat returns a stable number per name.
+local validModels = {}
+for _, name in ipairs({ 'prop_ld_flow_bottle', 'prop_cs_burger_01', 'prop_cs_hotdog_01', 'prop_sandwich_01',
+    'prop_choc_ego', 'prop_ecola_can', 'p_amb_coffeecup_01', 'prop_cs_beer_bot_01' }) do validModels[name] = true end
+local hashes, nextHash = {}, 1000
+function joaat(name)
+    if not hashes[name] then nextHash = nextHash + 1; hashes[name] = { value = nextHash, name = name } end
+    return hashes[name].value
+end
+function IsModelValid(hash)
+    for name, entry in pairs(hashes) do
+        if entry.value == hash then return validModels[name] == true end
+    end
+    return false
+end
+
 local completed = true
 local visuals = {}
 local events = {}
@@ -151,3 +167,34 @@ custom.canCancel = 0
 callCustom()
 equal(payload.canCancel, 0, 'invalid option remains available to library validation')
 print(('qbconsumables client: %d checks passed'):format(checks))
+
+-- Every default and per-item prop model must be a real model, on the right hand bone with an offset.
+for class, items in pairs(Config.Consumables) do
+    for item, data in pairs(items) do
+        if data.prop then
+            equal(validModels[data.prop.model], true, class .. '.' .. item .. ' prop model is valid')
+            equal(data.prop.bone, 28422, class .. '.' .. item .. ' prop is on the right hand')
+            equal(type(data.prop.offset), 'table', class .. '.' .. item .. ' has an offset')
+            equal(type(data.prop.rotation), 'table', class .. '.' .. item .. ' has a rotation')
+        end
+    end
+end
+equal(Config.Consumables.food.hot_dog.prop.model, 'prop_cs_hotdog_01', 'per-item model override applies')
+equal(Config.Consumables.food.hot_dog.prop.bone, Config.Consumables.food.sandwich.prop.bone, 'override inherits the class bone')
+
+-- An invalid configured model is skipped and the item is still used.
+Config.Consumables.food.broken = { prop = { model = '60309', bone = 28422, offset = { x = 0, y = 0, z = 0 }, rotation = { x = 0, y = 0, z = 0 } } }
+payload = nil
+equal(callback({ class = 'food', item = 'broken' }), true, 'item with invalid prop is still used')
+equal(payload.props, nil, 'invalid prop is not forwarded')
+equal(payload.prop, nil)
+Config.skipInvalidProps = false
+callback({ class = 'food', item = 'broken' })
+equal(payload.props[1].model, '60309', 'skipping can be disabled')
+Config.skipInvalidProps = true
+
+-- A progress bar error becomes a clean false, not a thrown error.
+local realStart = Kora.progressbar.start
+Kora.progressbar.start = function() error('Progress bar prop 1 has an invalid model.') end
+equal(callback({ class = 'drink', item = 'water' }), false, 'progress error returns false')
+Kora.progressbar.start = realStart

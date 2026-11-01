@@ -1,21 +1,27 @@
 Config = {}
 Config.Consumables = {}
 
+-- When true (default) a configured prop whose model is not a valid game model is skipped,
+-- so the item still gets used. Set false to let the progress bar raise the error instead.
+Config.skipInvalidProps = true
+-- Prints a client line whenever a prop is skipped or a progress bar fails.
+Config.Debug = false
+
 Config.Consumables.drink = {
     water = {},
-    coffee = {},
+    coffee = {prop = {model = "p_amb_coffeecup_01"}},
     -- Also handled instantly by kora_inventory; listed so they get the progress bar.
     water_bottle = {status = {thirst = 40}},
-    soda = {status = {thirst = 25, stress = -3}},
+    soda = {prop = {model = "prop_ecola_can"}, status = {thirst = 25, stress = -3}},
 }
 
 Config.Consumables.food = {
-    sandwich = {},
+    sandwich = {prop = {model = "prop_sandwich_01"}},
     chips = {},
-    egg_sandwich = {},
-    hot_dog = {},
+    egg_sandwich = {prop = {model = "prop_sandwich_01"}},
+    hot_dog = {prop = {model = "prop_cs_hotdog_01"}},
     bread = {status = {hunger = 20}},
-    chocolate_bar = {status = {hunger = 15, stress = -5}},
+    chocolate_bar = {prop = {model = "prop_choc_ego"}, status = {hunger = 15, stress = -5}},
 }
 
 Config.Consumables.smoke = {

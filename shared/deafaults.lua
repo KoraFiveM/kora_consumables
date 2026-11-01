@@ -100,34 +100,44 @@ if not Config.Consumables then
     until Config.Consumables
 end
 
-for k, v in pairs (Config.Consumables) do
-    local default = defaults[k]
-    for item, data in pairs(v) do
-        if not data.label then
-            local definition = exports.kora_core:getShared('items', item)
-            data.label = default.label .. (definition and definition.label or "")
-        end
-        if not data.duration then
-            data.duration = default.duration
-        end
-        if not data.anim then
-            data.anim = default.anim
-        end
-        if data.prop == nil then
-            data.prop = resolveProp(default.prop, k, nil)
-        elseif type(data.prop) == "table" and not data.prop.coords and default.prop then
-            -- A partial prop (for example only a model) inherits the class bone, offset and rotation.
-            data.prop = resolveProp(default.prop, k, data.prop)
-        end
-        if not data.disable then
-            data.disable = default.disable
-        end
-        if not data.status then
-            data.status = default.status
-        end
-        if not data.effects then
-            data.effects = default.effects
-        end
+defaults.custom = {
+    label = 'Using ',
+    duration = 4000,
+    disable = {move = true, combat = true, vehicle = true}
+}
+
+function ApplyConsumableDefaults(class, item, data)
+    local default = defaults[class]
+    if not data.label then
+        local definition = exports.kora_core:getShared('items', item)
+        data.label = default.label .. (definition and definition.label or "")
+    end
+    if not data.duration then
+        data.duration = default.duration
+    end
+    if not data.anim then
+        data.anim = default.anim
+    end
+    if data.prop == nil then
+        data.prop = resolveProp(default.prop, class, nil)
+    elseif type(data.prop) == "table" and not data.prop.coords and default.prop then
+        -- A partial prop (for example only a model) inherits the class bone, offset and rotation.
+        data.prop = resolveProp(default.prop, class, data.prop)
+    end
+    if not data.disable then
+        data.disable = default.disable
+    end
+    if not data.status then
+        data.status = default.status
+    end
+    if not data.effects then
+        data.effects = default.effects
+    end
+end
+
+for class, items in pairs(Config.Consumables) do
+    for item, data in pairs(items) do
+        ApplyConsumableDefaults(class, item, data)
     end
 end
 

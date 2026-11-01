@@ -9,7 +9,7 @@ end
 local handlers, items, updates, removals, statuses = {}, {}, {}, {}, {}
 local progress = true
 local metadataAccepted, removeAccepted = true, true
-exports = {
+exports = setmetatable({
     kora_core = {
         getShared = function(_, name) equal(name, 'items'); return nil end,
         createUseable = function(_, name, callback) handlers[name] = callback end,
@@ -37,10 +37,11 @@ exports = {
             return true
         end,
     },
-}
+}, { __call = function() end })
 local clock, elapsed, duringProgress = 0, 4000, nil
 GetGameTimer = function() return clock end
 Kora = {
+    compat = { provideExport = function() end },
     config = {
         enum = function(value) return value end,
         adopt = function(config) return config end,
@@ -56,6 +57,8 @@ Kora = {
     end },
 }
 local startHandlers = {}
+RegisterNetEvent = function() end
+TriggerClientEvent = function() end
 AddEventHandler = function(name, fn) if name == 'onResourceStart' then startHandlers[#startHandlers + 1] = fn end end
 dofile('shared/Config.lua')
 dofile('shared/deafaults.lua')

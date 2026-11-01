@@ -1,11 +1,8 @@
 
 local function addVisuals(effect)
-   if not effect then 
-       return
-   end
-   if effect.visual == 'none' then
-       return
-   end
+    if not effect or effect.visual == 'none' then
+        return
+    end
 
     if effect.visual == 'alien' then
         Kora.visuals.alien(effect.duration or 15000)

@@ -47,9 +47,19 @@ Kora = {
 for _, name in ipairs({ 'alien', 'coke', 'crack', 'meth', 'trevor' }) do
     Kora.visuals[name] = function(duration) events[#events + 1] = 'visual'; visuals[#visuals + 1] = { name = name, duration = duration } end
 end
+local netEvents, serverEvents = {}, {}
+function RegisterNetEvent(name, fn) netEvents[name] = fn end
+function TriggerServerEvent(name) serverEvents[#serverEvents + 1] = name end
+function CreateThread(fn) fn() end
 dofile('shared/Config.lua')
 dofile('shared/deafaults.lua')
 dofile('client/client.lua')
+
+equal(serverEvents[1], 'qbconsumables:sync', 'client asks the server for runtime-added items')
+netEvents['qbconsumables:register']('bad')
+netEvents['qbconsumables:register']({ { class = 'food', item = 'late_snack', data = { label = 'Late', duration = 10 } }, { class = 7 } })
+equal(Config.Consumables.food.late_snack.label, 'Late', 'server-registered item is usable on the client')
+equal(callback ~= nil, true)
 
 equal(Config.allowMovement, true, 'walking while using an item is allowed by default')
 -- The legacy restriction checks below assume the frozen behaviour.

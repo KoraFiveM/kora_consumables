@@ -106,3 +106,16 @@ Kora.callback.register('qbconsumables:progress', function(data)
     end
     return progress
 end)
+RegisterNetEvent('qbconsumables:register', function(entries)
+    if type(entries) ~= 'table' then return end
+    for _, entry in ipairs(entries) do
+        if type(entry) == 'table' and type(entry.class) == 'string' and type(entry.item) == 'string' and type(entry.data) == 'table' then
+            Config.Consumables[entry.class] = Config.Consumables[entry.class] or {}
+            Config.Consumables[entry.class][entry.item] = entry.data
+        end
+    end
+end)
+
+CreateThread(function()
+    TriggerServerEvent('qbconsumables:sync')
+end)

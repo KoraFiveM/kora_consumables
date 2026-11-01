@@ -55,6 +55,8 @@ Kora = {
         return progress
     end },
 }
+local startHandlers = {}
+AddEventHandler = function(name, fn) if name == 'onResourceStart' then startHandlers[#startHandlers + 1] = fn end end
 dofile('shared/Config.lua')
 dofile('shared/deafaults.lua')
 dofile('server/server.lua')
@@ -255,5 +257,17 @@ end
 use(2)
 equal(secondResult, false, 'start mode also rejects a concurrent use')
 Config.applyStatusOn = 'complete'
+
+-- Items kora_inventory also handles instantly are covered, and survive its restart.
+for _, name in ipairs({ 'water_bottle', 'soda', 'bread', 'chocolate_bar', 'sandwich', 'beer', 'whiskey' }) do
+    assert(handlers[name], name .. ' must be handled by kora_consumables')
+    checks = checks + 1
+end
+handlers.water_bottle = nil
+for _, fn in ipairs(startHandlers) do fn('some_other_resource') end
+equal(handlers.water_bottle, nil, 'unrelated resource start does not re-register')
+for _, fn in ipairs(startHandlers) do fn('kora_inventory') end
+assert(handlers.water_bottle, 'kora_inventory start re-registers consumables')
+checks = checks + 1
 
 print(('qbconsumables server: %d checks passed'):format(checks))

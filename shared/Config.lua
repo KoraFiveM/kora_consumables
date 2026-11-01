@@ -4,13 +4,18 @@ Config.Consumables = {}
 Config.Consumables.drink = {
     water = {},
     coffee = {},
+    -- Also handled instantly by kora_inventory; listed so they get the progress bar.
+    water_bottle = {status = {thirst = 40}},
+    soda = {status = {thirst = 25, stress = -3}},
 }
 
 Config.Consumables.food = {
     sandwich = {},
     chips = {},
     egg_sandwich = {},
-    hot_dog = {}
+    hot_dog = {},
+    bread = {status = {hunger = 20}},
+    chocolate_bar = {status = {hunger = 15, stress = -5}},
 }
 
 Config.Consumables.smoke = {
@@ -35,4 +40,4 @@ Config.Consumables.liquor = {
     whiskey = {},
     vodka = {},
     wine = {},
-}
+}

@@ -8,12 +8,13 @@ local defaults = {
             clip = "loop_bottle"
         },
         prop = {
-            -- Right hand (PH_R_Hand), the hand mp_player_intdrink raises to the mouth.
-            -- Offsets mirror the kora_emotemenu coffee attachment on the same bone.
             model = "prop_ld_flow_bottle",
-            bone = 28422,
-            offset = {x = 0.0, y = 0.0, z = 0.0},
-            rotation = {x = 0.0, y = 0.0, z = 130.0}
+            -- mp_player_intdrink raises the LEFT hand to the mouth, so the bottle follows it.
+            hands = {
+                left = {bone = 60309, offset = {x = 0.0, y = 0.0, z = 0.0}, rotation = {x = 0.0, y = 0.0, z = 0.0}},
+                right = {bone = 28422, offset = {x = 0.0, y = 0.0, z = 0.0}, rotation = {x = 0.0, y = 0.0, z = 130.0}}
+            },
+            hand = "left"
         },
         disable = {move = true, combat = true, vehicle = true},
         status = {thirst = 20}
@@ -27,12 +28,13 @@ local defaults = {
             flag = 49
         },
         prop = {
-            -- 60309 is a bone id (PH_L_Hand), not a model name, so the old prop never loaded.
-            -- Right hand (PH_R_Hand) is the hand mp_player_inteat@burger brings to the mouth.
             model = "prop_cs_burger_01",
-            bone = 28422,
-            offset = {x = 0.0, y = 0.0, z = 0.0},
-            rotation = {x = 0.0, y = 0.0, z = 130.0}
+            -- mp_player_inteat@burger brings the LEFT hand to the mouth, so the food follows it.
+            hands = {
+                left = {bone = 60309, offset = {x = 0.0, y = 0.0, z = 0.0}, rotation = {x = 0.0, y = 0.0, z = 0.0}},
+                right = {bone = 28422, offset = {x = 0.0, y = 0.0, z = 0.0}, rotation = {x = 0.0, y = 0.0, z = 130.0}}
+            },
+            hand = "left"
         },
         disable = {move = true, combat = true, vehicle = true},
         status = {hunger = 20}
@@ -57,15 +59,40 @@ local defaults = {
         },
         prop = {
             model = "prop_cs_beer_bot_01",
-            bone = 28422,
-            offset = {x = 0.01, y = -0.01, z = -0.06},
-            rotation = {x = 0.0, y = 0.0, z = 0.0}
+            -- The coffee idle_c clip is a right-handed drink.
+            hands = {
+                left = {bone = 60309, offset = {x = -0.01, y = -0.01, z = -0.06}, rotation = {x = 0.0, y = 0.0, z = 0.0}},
+                right = {bone = 28422, offset = {x = 0.01, y = -0.01, z = -0.06}, rotation = {x = 0.0, y = 0.0, z = 0.0}}
+            },
+            hand = "right"
         },
         disable = {move = true, combat = true, vehicle = true},
         status = {thirst = 10},
         effects = {visual = 'buzzed', duration = 15000}
     }
 }
+
+-- Class default attachment for the configured hand, then Config.propBone, then whatever the
+-- item sets itself (bone, offset, rotation).
+local function classSetting(setting, class, fallback)
+    if type(setting) == "table" then setting = setting[class] end
+    if setting == nil then return fallback end
+    return setting
+end
+
+local function resolveProp(base, class, own)
+    if not base then return nil end
+    local merged = {}
+    local hand = classSetting(Config.propHand, class, base.hand)
+    local attach = base.hands and (base.hands[hand] or base.hands[base.hand])
+    for key, value in pairs(base) do
+        if key ~= "hands" and key ~= "hand" then merged[key] = value end
+    end
+    for key, value in pairs(attach or {}) do merged[key] = value end
+    merged.bone = classSetting(Config.propBone, class, merged.bone)
+    for key, value in pairs(own or {}) do merged[key] = value end
+    return merged
+end
 
 if not Config.Consumables then
     repeat
@@ -87,13 +114,10 @@ for k, v in pairs (Config.Consumables) do
             data.anim = default.anim
         end
         if data.prop == nil then
-            data.prop = default.prop
+            data.prop = resolveProp(default.prop, k, nil)
         elseif type(data.prop) == "table" and not data.prop.coords and default.prop then
             -- A partial prop (for example only a model) inherits the class bone, offset and rotation.
-            local merged = {}
-            for key, value in pairs(default.prop) do merged[key] = value end
-            for key, value in pairs(data.prop) do merged[key] = value end
-            data.prop = merged
+            data.prop = resolveProp(default.prop, k, data.prop)
         end
         if not data.disable then
             data.disable = default.disable

@@ -177,7 +177,7 @@ for class, items in pairs(Config.Consumables) do
     for item, data in pairs(items) do
         if data.prop then
             equal(validModels[data.prop.model], true, class .. '.' .. item .. ' prop model is valid')
-            equal(data.prop.bone, 28422, class .. '.' .. item .. ' prop is on the right hand')
+            equal(data.prop.bone, class == 'liquor' and 28422 or 60309, class .. '.' .. item .. ' prop is on the hand the animation uses')
             equal(type(data.prop.offset), 'table', class .. '.' .. item .. ' has an offset')
             equal(type(data.prop.rotation), 'table', class .. '.' .. item .. ' has a rotation')
         end
@@ -185,6 +185,8 @@ for class, items in pairs(Config.Consumables) do
 end
 equal(Config.Consumables.food.hot_dog.prop.model, 'prop_cs_hotdog_01', 'per-item model override applies')
 equal(Config.Consumables.food.hot_dog.prop.bone, Config.Consumables.food.sandwich.prop.bone, 'override inherits the class bone')
+equal(Config.Consumables.drink.water.prop.bone, 60309, 'drink props use the left hand')
+equal(Config.Consumables.drink.water.prop.hands, nil, 'hand table is not leaked into the resolved prop')
 
 -- An invalid configured model is skipped and the item is still used.
 Config.Consumables.food.broken = { prop = { model = '60309', bone = 28422, offset = { x = 0, y = 0, z = 0 }, rotation = { x = 0, y = 0, z = 0 } } }

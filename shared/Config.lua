@@ -22,21 +22,40 @@ Config.propHand = { drink = 'left', food = 'left', liquor = 'right' }
 -- and prop.rotation to override everything.
 Config.propBone = nil
 
+-- Per-item attachment. A prop table may set model, bone, offset {x,y,z} (metres, in the bone's local
+-- space) and rotation {x,y,z} (degrees); anything left out is inherited from the class default for the
+-- hand chosen by Config.propHand. Setting only offset/rotation keeps the item on that hand's bone and
+-- Config.propHand/propBone still apply. Setting bone pins the item to that bone (the coffee below).
+-- Values here are starting points and may need a tweak in game; edit offset/rotation, no code change.
 Config.Consumables.drink = {
-    water = {},
-    coffee = {prop = {model = "p_amb_coffeecup_01"}},
+    -- Bottle held in the left palm (PH_L_Hand 60309); the default zero offset sat it too high.
+    water = {prop = {offset = {x = 0.0, y = 0.0, z = -0.03}, rotation = {x = 0.0, y = 0.0, z = 0.0}}},
+    -- Same animation and right-hand placement as the kora_emotemenu 'coffee' emote (known-good there):
+    -- amb@world_human_drinking@coffee@male@idle_a idle_c with the cup on SKEL_R_Hand 28422.
+    coffee = {
+        anim = {dict = "amb@world_human_drinking@coffee@male@idle_a", clip = "idle_c"},
+        prop = {model = "p_amb_coffeecup_01", bone = 28422,
+            offset = {x = 0.0, y = 0.0, z = 0.0}, rotation = {x = 0.0, y = 0.0, z = 130.0}},
+    },
     -- Also handled instantly by kora_inventory; listed so they get the progress bar.
-    water_bottle = {status = {thirst = 40}},
-    soda = {prop = {model = "prop_ecola_can"}, status = {thirst = 25, stress = -3}},
+    water_bottle = {status = {thirst = 40}, prop = {offset = {x = 0.0, y = 0.0, z = -0.03}, rotation = {x = 0.0, y = 0.0, z = 0.0}}},
+    -- Can pulled back into the palm; the zero offset left it floating at the fingertips.
+    soda = {
+        prop = {model = "prop_ecola_can", offset = {x = 0.0, y = 0.0, z = -0.06}, rotation = {x = 0.0, y = 0.0, z = 0.0}},
+        status = {thirst = 25, stress = -3},
+    },
 }
 
 Config.Consumables.food = {
-    sandwich = {prop = {model = "prop_sandwich_01"}},
+    sandwich = {prop = {model = "prop_sandwich_01", offset = {x = 0.0, y = 0.0, z = -0.02}, rotation = {x = 0.0, y = 0.0, z = 0.0}}},
     chips = {},
-    egg_sandwich = {prop = {model = "prop_sandwich_01"}},
-    hot_dog = {prop = {model = "prop_cs_hotdog_01"}},
-    bread = {status = {hunger = 20}},
-    chocolate_bar = {prop = {model = "prop_choc_ego"}, status = {hunger = 15, stress = -5}},
+    egg_sandwich = {prop = {model = "prop_sandwich_01", offset = {x = 0.0, y = 0.0, z = -0.02}, rotation = {x = 0.0, y = 0.0, z = 0.0}}},
+    hot_dog = {prop = {model = "prop_cs_hotdog_01", offset = {x = 0.0, y = 0.0, z = -0.02}, rotation = {x = 0.0, y = 0.0, z = 0.0}}},
+    bread = {status = {hunger = 20}, prop = {offset = {x = 0.0, y = 0.0, z = -0.02}, rotation = {x = 0.0, y = 0.0, z = 0.0}}},
+    chocolate_bar = {
+        prop = {model = "prop_choc_ego", offset = {x = 0.0, y = 0.0, z = -0.02}, rotation = {x = 0.0, y = 0.0, z = 0.0}},
+        status = {hunger = 15, stress = -5},
+    },
 }
 
 Config.Consumables.smoke = {

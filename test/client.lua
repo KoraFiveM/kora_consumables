@@ -51,6 +51,10 @@ dofile('shared/Config.lua')
 dofile('shared/deafaults.lua')
 dofile('client/client.lua')
 
+equal(Config.allowMovement, true, 'walking while using an item is allowed by default')
+-- The legacy restriction checks below assume the frozen behaviour.
+Config.allowMovement = false
+
 -- adopt() is a pass-through in this harness, so the enum descriptor is still visible.
 local setting = Config.applyStatusOn
 equal(setting.value, 'complete', 'effects default to applying on completion')
@@ -198,3 +202,50 @@ local realStart = Kora.progressbar.start
 Kora.progressbar.start = function() error('Progress bar prop 1 has an invalid model.') end
 equal(callback({ class = 'drink', item = 'water' }), false, 'progress error returns false')
 Kora.progressbar.start = realStart
+
+-- Movement while eating and drinking (Config.allowMovement).
+Config.allowMovement = true
+for _, input in ipairs({ { 'drink', 'water' }, { 'food', 'sandwich' }, { 'smoke', 'ak47_joint' }, { 'liquor', 'beer' } }) do
+    local definition = Config.Consumables[input[1]][input[2]]
+    equal(callback({ class = input[1], item = input[2] }), true)
+    equal(payload.disable.move, false, input[1] .. ' does not freeze movement by default')
+    equal(payload.disable.combat, true, 'combat stays disabled')
+    equal(payload.disable.car, true, 'vehicle use stays disabled')
+    equal(payload.anim.flag & 48, 48, input[1] .. ' anim is upper body + allow control')
+    equal(payload.anim.dict, definition.anim.dict)
+    equal(payload.anim.clip, definition.anim.clip)
+    equal(definition.disable.move, true, 'shared defaults are not mutated')
+end
+equal(Config.Consumables.drink.water.anim.flag, nil, 'drink default anim is not mutated')
+equal(Config.Consumables.food.sandwich.anim.flag, 49, 'food default flag stays 49')
+callback({ class = 'drink', item = 'water' })
+equal(payload.anim.flag, 49, 'a flagless anim becomes 49 when movement is allowed')
+
+Config.allowMovement = false
+callback({ class = 'drink', item = 'water' })
+equal(payload.disable.move, true, 'Config.allowMovement=false freezes movement')
+equal(payload.anim, Config.Consumables.drink.water.anim, 'anim untouched when frozen')
+
+Config.allowMovement = { food = false }
+callback({ class = 'food', item = 'sandwich' })
+equal(payload.disable.move, true, 'per-class false freezes that class')
+callback({ class = 'drink', item = 'water' })
+equal(payload.disable.move, false, 'classes missing from the table default to allowed')
+
+Config.allowMovement = true
+Config.Consumables.drink.water.allowMovement = false
+callback({ class = 'drink', item = 'water' })
+equal(payload.disable.move, true, 'item allowMovement=false overrides the global setting')
+Config.allowMovement = false
+Config.Consumables.drink.water.allowMovement = true
+callback({ class = 'drink', item = 'water' })
+equal(payload.disable.move, false, 'item allowMovement=true overrides the global setting')
+equal(payload.anim.flag, 49)
+Config.Consumables.drink.water.allowMovement = nil
+Config.allowMovement = true
+
+Config.Consumables.food.looped = { anim = { dict = 'd', clip = 'c', flag = 0 }, disable = false }
+callback({ class = 'food', item = 'looped' })
+equal(payload.disable, false, 'no restrictions stays false')
+equal(payload.anim.flag, 48, 'flag 0 is upgraded to allow movement')
+print(('qbconsumables movement: %d checks passed'):format(checks))

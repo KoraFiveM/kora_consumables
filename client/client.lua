@@ -37,6 +37,31 @@ local function usableProp(prop, item)
     return nil
 end
 
+-- Whether the player may walk while using this item: a per-item allowMovement wins,
+-- then Config.allowMovement (boolean, or a table keyed by class), default true.
+local function movementAllowed(itemData, class)
+    if itemData.allowMovement ~= nil then
+        return itemData.allowMovement == true
+    end
+    local setting = Config.allowMovement
+    if type(setting) == 'table' then
+        setting = setting[class]
+    end
+    return setting ~= false
+end
+
+-- Upper-body (16) + allow player control (32) keep the legs free; flag 0/1 would lock the body.
+local UPPER_BODY_CONTROL = 48
+local function movableAnim(anim)
+    if type(anim) ~= 'table' then
+        return anim
+    end
+    local copy = {}
+    for key, value in pairs(anim) do copy[key] = value end
+    copy.flag = (copy.flag or 1) | UPPER_BODY_CONTROL
+    return copy
+end
+
 Kora.callback.register('qbconsumables:progress', function(data)
     assert(data and data.class and data.item, "Invalid data passed to qbconsumables:progress")
     local itemData = Config.Consumables[data.class] and Config.Consumables[data.class][data.item] or nil
@@ -50,13 +75,21 @@ Kora.callback.register('qbconsumables:progress', function(data)
         disable = Kora.util.deepClone(disable)
         disable.car = disable.vehicle
     end
+    local anim = itemData.anim or nil
+    if movementAllowed(itemData, data.class) then
+        if type(disable) == 'table' and disable.move then
+            disable = Kora.util.deepClone(disable)
+            disable.move = false
+        end
+        anim = movableAnim(anim)
+    end
     -- An error inside the progress bar must reach the server as a clean failure.
     local started, progress = pcall(Kora.progressbar.start, {
         label = itemData.label or "Using item",
         duration = itemData.duration or 1000,
         useWhileDead = itemData.useWhileDead or false,
         canCancel = itemData.canCancel == nil or itemData.canCancel,
-        anim = itemData.anim or nil,
+        anim = anim,
         prop = prop and prop.coords and prop or nil,
         props = prop and not prop.coords and { prop } or nil,
         emote = itemData.emote or nil,

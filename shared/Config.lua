@@ -6,6 +6,12 @@ Config.Consumables = {}
 Config.skipInvalidProps = true
 -- Prints a client line whenever a prop is skipped or a progress bar fails.
 Config.Debug = false
+-- true (default): the player can walk while eating, drinking or smoking; the animation is
+-- played on the upper body (anim flag 49) and movement is not frozen. Combat and vehicle
+-- restrictions from the item defaults still apply. false: freeze movement for the whole use.
+-- May also be a table per class, e.g. { food = true, drink = true, smoke = false, liquor = false }
+-- (classes left out count as true). A single item can override this with allowMovement = true/false.
+Config.allowMovement = true
 
 Config.Consumables.drink = {
     water = {},

@@ -27,7 +27,7 @@ function TriggerClientEvent(name, target, ...) sent[#sent + 1] = { name = name, 
 function AddEventHandler() end
 source = nil
 dofile('shared/Config.lua')
-dofile('shared/deafaults.lua')
+dofile('shared/defaults.lua')
 dofile('server/server.lua')
 
 for _, name in ipairs({ 'AddFood', 'AddDrink', 'AddAlcohol', 'AddCustom' }) do

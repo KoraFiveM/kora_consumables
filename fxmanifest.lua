@@ -12,7 +12,9 @@ dependency 'kora_core'
 
 shared_script {
     '@kora_lib/init.lua',
-    'shared/**.lua'
+    -- Config first: defaults.lua reads Config.Consumables at load.
+    'shared/Config.lua',
+    'shared/defaults.lua'
 }
 
 server_script 'server/**.lua'

@@ -52,7 +52,7 @@ function RegisterNetEvent(name, fn) netEvents[name] = fn end
 function TriggerServerEvent(name) serverEvents[#serverEvents + 1] = name end
 function CreateThread(fn) fn() end
 dofile('shared/Config.lua')
-dofile('shared/deafaults.lua')
+dofile('shared/defaults.lua')
 dofile('client/client.lua')
 
 equal(serverEvents[1], 'qbconsumables:sync', 'client asks the server for runtime-added items')

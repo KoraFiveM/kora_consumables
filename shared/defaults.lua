@@ -94,12 +94,6 @@ local function resolveProp(base, class, own)
     return merged
 end
 
-if not Config.Consumables then
-    repeat
-        Wait(20)
-    until Config.Consumables
-end
-
 defaults.custom = {
     label = 'Using ',
     duration = 4000,

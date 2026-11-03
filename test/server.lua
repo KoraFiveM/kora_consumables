@@ -61,7 +61,7 @@ RegisterNetEvent = function() end
 TriggerClientEvent = function() end
 AddEventHandler = function(name, fn) if name == 'onResourceStart' then startHandlers[#startHandlers + 1] = fn end end
 dofile('shared/Config.lua')
-dofile('shared/deafaults.lua')
+dofile('shared/defaults.lua')
 dofile('server/server.lua')
 
 local function seed(uses)

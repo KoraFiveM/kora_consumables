@@ -58,7 +58,8 @@ Kora = {
 }
 local startHandlers = {}
 RegisterNetEvent = function() end
-TriggerClientEvent = function() end
+local clientEvents = {}
+TriggerClientEvent = function(name, target, ...) clientEvents[#clientEvents + 1] = { name = name, target = target, args = { ... } } end
 AddEventHandler = function(name, fn) if name == 'onResourceStart' then startHandlers[#startHandlers + 1] = fn end end
 dofile('test/kora_helpers.lua')(Kora)
 dofile('shared/Config.lua')
@@ -273,5 +274,24 @@ equal(handlers.water_bottle, nil, 'unrelated resource start does not re-register
 for _, fn in ipairs(startHandlers) do fn('kora_inventory') end
 assert(handlers.water_bottle, 'kora_inventory start re-registers consumables')
 checks = checks + 1
+
+-- F#288: health/armor go to the owning client, not into unused metadata.
+progress = true
+definition.keep = nil
+duringProgress = nil
+local oldStatus = definition.status
+definition.status = { hunger = 10, health = -5, armor = 20 }
+seed(2)
+elapsed = definition.duration or 4000
+clientEvents = {}
+use(2)
+for _, entry in ipairs(statuses) do
+    equal(entry.key ~= 'health' and entry.key ~= 'armor', true, 'health/armor are not written to metadata')
+end
+local vitals
+for _, event in ipairs(clientEvents) do if event.name == 'qbconsumables:client:vitals' then vitals = event end end
+equal(vitals ~= nil, true, 'vitals are sent to the client')
+equal(vitals.target, 17); equal(vitals.args[1], -5); equal(vitals.args[2], 20)
+definition.status = oldStatus
 
 print(('qbconsumables server: %d checks passed'):format(checks))

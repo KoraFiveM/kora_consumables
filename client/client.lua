@@ -1,3 +1,17 @@
+-- status.health / status.armor from the item (F#288). Health never drops below
+-- the death threshold, so a consumable can hurt but not kill.
+RegisterNetEvent('qbconsumables:client:vitals', function(health, armor)
+    local ped = PlayerPedId()
+    health, armor = tonumber(health) or 0, tonumber(armor) or 0
+    if health ~= 0 and health == health and not IsEntityDead(ped) then
+        local current = GetEntityHealth(ped)
+        SetEntityHealth(ped, math.floor(math.max(101, math.min(GetEntityMaxHealth(ped), current + health))))
+    end
+    if armor ~= 0 and armor == armor then
+        SetPedArmour(ped, math.floor(math.max(0, math.min(100, GetPedArmour(ped) + armor))))
+    end
+end)
+
 
 local function addVisuals(effect)
     if not effect or effect.visual == 'none' then

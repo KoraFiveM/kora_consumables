@@ -9,11 +9,10 @@ local function addStatus(src, status)
     if status.stress then
         exports.kora_core:incrementMetaData(src, 'stress', status.stress, 0, 100)
     end
-    if status.health then
-        exports.kora_core:incrementMetaData(src, 'health', status.health, 0, 100)
-    end
-    if status.armor then
-        exports.kora_core:incrementMetaData(src, 'armor', status.armor, 0, 100)
+    -- Health and armour live on the ped, not in metadata (nothing reads a 'health'
+    -- metadata field), so the owning client applies them (F#288).
+    if status.health or status.armor then
+        TriggerClientEvent('qbconsumables:client:vitals', src, status.health or 0, status.armor or 0)
     end
     if status.drunk then
         exports.kora_core:incrementMetaData(src, 'drunk', status.drunk, 0, 100)

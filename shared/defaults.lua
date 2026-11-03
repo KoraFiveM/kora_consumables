@@ -46,7 +46,7 @@ local defaults = {
             dict = "mp_player_int_smoke",
             clip = "loop"
         },
-        status = {stress = -10, health = -5},
+        status = {stress = -10},
         disable = {move = true, combat = true, vehicle = true},
         effects = {visual = 'alien', duration = 15000}
     },

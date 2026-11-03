@@ -15,3 +15,12 @@ and applies the status after the client progress bar finishes.
   raised on the client by the server after a completed use. `replenish.server = true` events are not wired,
   because stock fires them from the client.
 - Added items are sent to online clients and to players who join later.
+
+## Effects
+
+- `Config.buzzedShake` (default `0.4`): strength of the light camera shake liquor's
+  `buzzed` visual plays for the drink's `effects.duration`. Set it to `0` to turn it off.
+- `status.health` / `status.armor` on an item change the player's ped health and armour
+  on their client. Health never drops to the death threshold, healing caps at max
+  health, and dead players are not revived. The smoke class no longer ships a
+  `health` value (it never applied before), so default gameplay is unchanged.

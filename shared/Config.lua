@@ -22,6 +22,10 @@ Config.propHand = { drink = 'left', food = 'left', liquor = 'right' }
 -- and prop.rotation to override everything.
 Config.propBone = nil
 
+-- Camera shake strength for the 'buzzed' visual that liquor applies by default (0.0-1.0).
+-- 0 turns the liquor effect off. Duration comes from the item's effects.duration.
+Config.buzzedShake = 0.4
+
 -- Per-item attachment. A prop table may set model, bone, offset {x,y,z} (metres, in the bone's local
 -- space) and rotation {x,y,z} (degrees); anything left out is inherited from the class default for the
 -- hand chosen by Config.propHand. Setting only offset/rotation keeps the item on that hand's bone and

@@ -1,3 +1,18 @@
+-- Liquor's 'buzzed' visual: a light drunk camera shake for the effect duration
+-- (F#287). Config.buzzedShake sets the strength; 0 turns it off. One timer per
+-- drink, and only the latest drink's timer stops the shake.
+local buzzedToken = 0
+local function buzzed(duration)
+    local shake = tonumber(Config.buzzedShake) or 0
+    if shake <= 0 then return end
+    buzzedToken = buzzedToken + 1
+    local token = buzzedToken
+    ShakeGameplayCam('DRUNK_SHAKE', math.min(shake, 1.0))
+    SetTimeout(duration, function()
+        if token == buzzedToken then StopGameplayCamShaking(true) end
+    end)
+end
+
 -- status.health / status.armor from the item (F#288). Health never drops below
 -- the death threshold, so a consumable can hurt but not kill.
 RegisterNetEvent('qbconsumables:client:vitals', function(health, armor)
@@ -28,6 +43,8 @@ local function addVisuals(effect)
         Kora.visuals.meth(effect.duration or 15000)
     elseif effect.visual == 'trevor' then
         Kora.visuals.trevor(effect.duration or 15000)
+    elseif effect.visual == 'buzzed' then
+        buzzed(effect.duration or 15000)
     end
 end
 

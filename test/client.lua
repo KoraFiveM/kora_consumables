@@ -51,6 +51,17 @@ local netEvents, serverEvents = {}, {}
 function RegisterNetEvent(name, fn) netEvents[name] = fn end
 function TriggerServerEvent(name) serverEvents[#serverEvents + 1] = name end
 function CreateThread(fn) fn() end
+local shakes, timeouts, ped = {}, {}, { health = 150, maxHealth = 200, armour = 10, dead = false }
+function ShakeGameplayCam(name, amount) shakes[#shakes + 1] = { name = name, amount = amount } end
+function StopGameplayCamShaking() shakes[#shakes + 1] = 'stop' end
+function SetTimeout(ms, fn) timeouts[#timeouts + 1] = { ms = ms, fn = fn } end
+function PlayerPedId() return ped end
+function IsEntityDead() return ped.dead end
+function GetEntityHealth() return ped.health end
+function GetEntityMaxHealth() return ped.maxHealth end
+function SetEntityHealth(_, value) ped.health = value end
+function GetPedArmour() return ped.armour end
+function SetPedArmour(_, value) ped.armour = value end
 dofile('shared/Config.lua')
 dofile('shared/defaults.lua')
 dofile('client/client.lua')
@@ -276,3 +287,37 @@ equal(cup.prop.bone, 28422, 'coffee cup is on the right hand like the emote menu
 equal(cup.prop.rotation.z, 130.0, 'coffee cup rotation matches the emote menu')
 equal(cup.anim.dict, 'amb@world_human_drinking@coffee@male@idle_a', 'coffee plays the animation the placement was made for')
 print('qbconsumables client: per-item prop offsets ok')
+
+-- F#286: the pisswaser 3/4 keys match the core item names.
+equal(Config.Consumables.liquor.beer_pisswaser3 ~= nil, true, 'beer_pisswaser3 is configured')
+equal(Config.Consumables.liquor.beer_pisswaser4 ~= nil, true, 'beer_pisswaser4 is configured')
+equal(Config.Consumables.liquor.beer_posswaser3, nil, 'the typo key is gone')
+
+-- F#287: liquor's default 'buzzed' visual now does something, and can be turned off.
+shakes, timeouts = {}, {}
+equal(Config.Consumables.liquor.beer.effects.visual, 'buzzed')
+callback({ class = 'liquor', item = 'beer' })
+equal(shakes[1] and shakes[1].name, 'DRUNK_SHAKE', 'buzzed shakes the camera')
+equal(shakes[1].amount, Config.buzzedShake)
+callback({ class = 'liquor', item = 'beer' })
+equal(#timeouts, 2, 'one timer per drink, no loop')
+timeouts[1].fn()
+equal(shakes[#shakes] ~= 'stop', true, 'an older drink does not stop a newer shake')
+timeouts[2].fn()
+equal(shakes[#shakes], 'stop', 'the latest drink ends the shake')
+Config.buzzedShake = 0
+shakes = {}
+callback({ class = 'liquor', item = 'beer' })
+equal(#shakes, 0, 'buzzedShake = 0 turns it off')
+
+-- F#288: health and armour are applied to the ped, never below the death threshold.
+netEvents['qbconsumables:client:vitals'](-5, 25)
+equal(ped.health, 145); equal(ped.armour, 35)
+netEvents['qbconsumables:client:vitals'](-500, 500)
+equal(ped.health, 101, 'a consumable cannot kill'); equal(ped.armour, 100)
+netEvents['qbconsumables:client:vitals'](500, 0)
+equal(ped.health, 200, 'healing caps at max health')
+ped.dead, ped.health = true, 0
+netEvents['qbconsumables:client:vitals'](50, 0)
+equal(ped.health, 0, 'a dead player is not revived')
+print('qbconsumables client: buzzed and vitals ok')

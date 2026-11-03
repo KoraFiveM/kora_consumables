@@ -60,6 +60,7 @@ local startHandlers = {}
 RegisterNetEvent = function() end
 TriggerClientEvent = function() end
 AddEventHandler = function(name, fn) if name == 'onResourceStart' then startHandlers[#startHandlers + 1] = fn end end
+dofile('test/kora_helpers.lua')(Kora)
 dofile('shared/Config.lua')
 dofile('shared/defaults.lua')
 dofile('server/server.lua')

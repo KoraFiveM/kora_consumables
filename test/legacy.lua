@@ -26,6 +26,7 @@ function RegisterNetEvent(name, fn) netEvents[name] = fn end
 function TriggerClientEvent(name, target, ...) sent[#sent + 1] = { name = name, target = target, args = { ... } } end
 function AddEventHandler() end
 source = nil
+dofile('test/kora_helpers.lua')(Kora)
 dofile('shared/Config.lua')
 dofile('shared/defaults.lua')
 dofile('server/server.lua')

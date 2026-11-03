@@ -112,11 +112,12 @@ end)
 local legacyClass = { AddFood = 'food', AddDrink = 'drink', AddAlcohol = 'liquor', AddCustom = 'custom' }
 local legacyStatus = { food = 'hunger', drink = 'thirst', liquor = 'thirst' }
 local added = {}
-local lastSync = {}
 local SYNC_COOLDOWN = 5000
+local syncCooldown = Kora.timers.cooldown(SYNC_COOLDOWN, { clearOnDrop = true })
+local AMOUNT = { min = 0, max = 100, integer = false }
 
 local function amount(value)
-    return type(value) == 'number' and value == value and value >= 0 and value <= 100 and value or nil
+    return (Kora.util.toAmount(value, AMOUNT))
 end
 
 local function vec(value)
@@ -186,10 +187,6 @@ end
 
 RegisterNetEvent('qbconsumables:sync', function()
     local src = source
-    local now = GetGameTimer()
-    if #added == 0 or (lastSync[src] and now - lastSync[src] < SYNC_COOLDOWN) then return end
-    lastSync[src] = now
+    if #added == 0 or not syncCooldown.use(src) then return end
     TriggerClientEvent('qbconsumables:register', src, added)
 end)
-
-AddEventHandler('playerDropped', function() lastSync[source] = nil end)

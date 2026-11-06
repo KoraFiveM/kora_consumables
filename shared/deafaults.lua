@@ -43,8 +43,8 @@ local defaults = {
         label = 'Smoking ',
         duration = 4000,
         anim = {
-            dict = "mp_player_int_smoke",
-            clip = "loop"
+            dict = "mp_player_int_uppersmoke",
+            clip = "mp_player_int_smoke"
         },
         status = {stress = -10, health = -5},
         disable = {move = true, combat = true, vehicle = true},

@@ -6,6 +6,12 @@ Config.Consumables = {}
 Config.skipInvalidProps = true
 -- Prints a client line whenever a prop is skipped or a progress bar fails.
 Config.Debug = false
+-- true (default): alcohol also gives a drunk walking style for as long as the buzzed effect lasts.
+Config.DrunkWalk = true
+-- Movement clipset used for the drunk walk.
+Config.DrunkWalkClipset = 'move_m@drunk@verydrunk'
+-- true (default): show a "Drunk" notification when the buzzed effect starts.
+Config.DrunkNotify = true
 -- true (default): the player can walk while eating, drinking or smoking; the animation is
 -- played on the upper body (anim flag 49) and movement is not frozen. Combat and vehicle
 -- restrictions from the item defaults still apply. false: freeze movement for the whole use.
@@ -63,6 +69,7 @@ Config.Consumables.food = {
 
 Config.Consumables.smoke = {
     cigarette = {effects = {visual = 'none', duration = 0}},
+    joint = {},
     ak47_joint = {},
     amnesia_joint = {},
     blue_dream_joint = {},

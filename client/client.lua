@@ -1,10 +1,44 @@
 
+local buzzedToken = 0
+
+-- Drunk screen effect for alcohol; kora_lib has no buzzed visual, so it is applied here.
+local function buzzed(duration)
+    buzzedToken = buzzedToken + 1
+    local token = buzzedToken
+    SetTimecycleModifier('drug_drive_blend01')
+    SetTimecycleModifierStrength(0.6)
+    ShakeGameplayCam('DRUNK_SHAKE', 0.6)
+    if Config.DrunkNotify ~= false and Kora and Kora.notify and Kora.notify.send then
+        Kora.notify.send({ title = 'Drunk', message = "Congratulations! You've unlocked drunk mode.", type = 'info' })
+    end
+    local walk = Config.DrunkWalk ~= false and Config.DrunkWalkClipset or nil
+    if walk then
+        RequestAnimSet(walk)
+        local timeout = GetGameTimer() + 5000
+        while not HasAnimSetLoaded(walk) and GetGameTimer() < timeout do Wait(0) end
+        if HasAnimSetLoaded(walk) then
+            SetPedMovementClipset(PlayerPedId(), walk, 1.0)
+        else
+            walk = nil
+        end
+    end
+    CreateThread(function()
+        Wait(duration)
+        if token ~= buzzedToken then return end
+        ClearTimecycleModifier()
+        StopGameplayCamShaking(true)
+        if walk then ResetPedMovementClipset(PlayerPedId(), 1.0) end
+    end)
+end
+
 local function addVisuals(effect)
     if not effect or effect.visual == 'none' then
         return
     end
 
-    if effect.visual == 'alien' then
+    if effect.visual == 'buzzed' then
+        buzzed(effect.duration or 15000)
+    elseif effect.visual == 'alien' then
         Kora.visuals.alien(effect.duration or 15000)
     elseif effect.visual == 'coke' then
         Kora.visuals.coke(effect.duration or 15000)

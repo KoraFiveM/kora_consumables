@@ -23,6 +23,20 @@ function IsModelValid(hash)
     return false
 end
 
+-- Drunk-visual natives are not emulated; stub them so buzzed() runs without erroring.
+function GetGameTimer() return 0 end
+function SetTimecycleModifier() end
+function SetTimecycleModifierStrength() end
+function ClearTimecycleModifier() end
+function ShakeGameplayCam() end
+function StopGameplayCamShaking() end
+function RequestAnimSet() end
+function HasAnimSetLoaded() return true end
+function SetPedMovementClipset() end
+function ResetPedMovementClipset() end
+function PlayerPedId() return 1 end
+function Wait() end
+
 local completed = true
 local visuals = {}
 local events = {}

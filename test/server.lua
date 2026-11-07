@@ -13,6 +13,7 @@ exports = setmetatable({
     kora_core = {
         getShared = function(_, name) equal(name, 'items'); return nil end,
         createUseable = function(_, name, callback) handlers[name] = callback end,
+        registerShared = function() end,
         incrementMetaData = function(_, src, key, amount, low, high)
             statuses[#statuses + 1] = { src = src, key = key, amount = amount, low = low, high = high }
         end,

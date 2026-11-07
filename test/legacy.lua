@@ -11,6 +11,7 @@ exports = setmetatable({
     kora_core = {
         getShared = function(_, kind, name) if kind == 'items' and shared[name] then return { label = shared[name] } end end,
         createUseable = function(_, name, callback) handlers[name] = callback end,
+        registerShared = function() end,
         incrementMetaData = function(_, src, key, amount) statuses[#statuses + 1] = { src = src, key = key, amount = amount } end,
     },
     ['qb-inventory'] = { SetItemData = function() return true end },

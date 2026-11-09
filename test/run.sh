@@ -6,7 +6,7 @@ lua_bin="${LUA:-lua}"
 status=0
 
 cd "$dir" || exit 1
-for file in test/server.lua test/client.lua test/legacy.lua; do
+for file in test/server.lua test/client.lua test/legacy.lua test/startup.lua; do
     echo "== $file =="
     "$lua_bin" "$file" || status=1
 done

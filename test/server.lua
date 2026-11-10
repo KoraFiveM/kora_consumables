@@ -49,7 +49,7 @@ Kora = {
     },
     callback = { trigger = function(src, name, payload)
         equal(src, 17)
-        equal(name, 'qbconsumables:progress')
+        equal(name, 'kora_consumables:progress')
         equal(payload.class, 'food')
         equal(payload.item, 'sandwich')
         if duringProgress then duringProgress() end
@@ -274,4 +274,4 @@ for _, fn in ipairs(startHandlers) do fn('kora_inventory') end
 assert(handlers.water_bottle, 'kora_inventory start re-registers consumables')
 checks = checks + 1
 
-print(('qbconsumables server: %d checks passed'):format(checks))
+print(('kora_consumables server: %d checks passed'):format(checks))

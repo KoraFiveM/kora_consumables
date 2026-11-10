@@ -93,8 +93,8 @@ local function movableAnim(anim)
     return copy
 end
 
-Kora.callback.register('qbconsumables:progress', function(data)
-    assert(data and data.class and data.item, "Invalid data passed to qbconsumables:progress")
+Kora.callback.register('kora_consumables:progress', function(data)
+    assert(data and data.class and data.item, "Invalid data passed to kora_consumables:progress")
     local itemData = Config.Consumables[data.class] and Config.Consumables[data.class][data.item] or nil
     if not itemData then
         return false
@@ -137,7 +137,7 @@ Kora.callback.register('qbconsumables:progress', function(data)
     end
     return progress
 end)
-RegisterNetEvent('qbconsumables:register', function(entries)
+RegisterNetEvent('kora_consumables:register', function(entries)
     if type(entries) ~= 'table' then return end
     for _, entry in ipairs(entries) do
         if type(entry) == 'table' and type(entry.class) == 'string' and type(entry.item) == 'string' and type(entry.data) == 'table' then
@@ -148,5 +148,5 @@ RegisterNetEvent('qbconsumables:register', function(entries)
 end)
 
 CreateThread(function()
-    TriggerServerEvent('qbconsumables:sync')
+    TriggerServerEvent('kora_consumables:sync')
 end)

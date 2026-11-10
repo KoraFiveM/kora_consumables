@@ -1,8 +1,6 @@
 fx_version 'cerulean'
 game 'gta5'
 lua54 'yes'
--- Keep the legacy resource name resolvable for exports['qbconsumables'] callers.
-provide 'qbconsumables'
 author 'Kakarot'
 description 'its in the name, just read'
 version '1.2.1'

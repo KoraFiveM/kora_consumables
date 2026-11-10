@@ -59,12 +59,12 @@ local function useConsumable(src, category, item, data, itemData)
 
     if Config.applyStatusOn == 'start' then
         applyUse(src, item, data, itemData)
-        Kora.callback.trigger(src, 'qbconsumables:progress', payload)
+        Kora.callback.trigger(src, 'kora_consumables:progress', payload)
         return
     end
 
     local startedAt = GetGameTimer()
-    local progressbar = Kora.callback.trigger(src, 'qbconsumables:progress', payload)
+    local progressbar = Kora.callback.trigger(src, 'kora_consumables:progress', payload)
     if not progressbar then return end
 
     -- The client reports its own result, so a modified client could answer at once.
@@ -185,7 +185,7 @@ local function legacyAdd(export, name, value)
     ApplyConsumableDefaults(class, name, data)
     added[#added + 1] = {class = class, item = name, data = data}
     registerUseable(class, name, data)
-    TriggerClientEvent('qbconsumables:register', -1, {added[#added]})
+    TriggerClientEvent('kora_consumables:register', -1, {added[#added]})
     return true, 'success'
 end
 
@@ -195,12 +195,12 @@ for export in pairs(legacyClass) do
     Kora.compat.provideExport('qb-smallresources', export, handler)
 end
 
-RegisterNetEvent('qbconsumables:sync', function()
+RegisterNetEvent('kora_consumables:sync', function()
     local src = source
     local now = GetGameTimer()
     if #added == 0 or (lastSync[src] and now - lastSync[src] < SYNC_COOLDOWN) then return end
     lastSync[src] = now
-    TriggerClientEvent('qbconsumables:register', src, added)
+    TriggerClientEvent('kora_consumables:register', src, added)
 end)
 
 AddEventHandler('playerDropped', function() lastSync[source] = nil end)

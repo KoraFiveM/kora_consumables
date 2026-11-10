@@ -43,7 +43,7 @@ local events = {}
 exports = { kora_core = { getShared = function() return {} end } }
 Kora = {
     callback = { register = function(name, handler)
-        equal(name, 'qbconsumables:progress')
+        equal(name, 'kora_consumables:progress')
         callback = handler
     end },
     config = {
@@ -69,9 +69,9 @@ dofile('shared/Config.lua')
 dofile('shared/deafaults.lua')
 dofile('client/client.lua')
 
-equal(serverEvents[1], 'qbconsumables:sync', 'client asks the server for runtime-added items')
-netEvents['qbconsumables:register']('bad')
-netEvents['qbconsumables:register']({ { class = 'food', item = 'late_snack', data = { label = 'Late', duration = 10 } }, { class = 7 } })
+equal(serverEvents[1], 'kora_consumables:sync', 'client asks the server for runtime-added items')
+netEvents['kora_consumables:register']('bad')
+netEvents['kora_consumables:register']({ { class = 'food', item = 'late_snack', data = { label = 'Late', duration = 10 } }, { class = 7 } })
 equal(Config.Consumables.food.late_snack.label, 'Late', 'server-registered item is usable on the client')
 equal(callback ~= nil, true)
 
@@ -194,7 +194,7 @@ equal(payload.canCancel, true)
 custom.canCancel = 0
 callCustom()
 equal(payload.canCancel, 0, 'invalid option remains available to library validation')
-print(('qbconsumables client: %d checks passed'):format(checks))
+print(('kora_consumables client: %d checks passed'):format(checks))
 
 -- Every default and per-item prop model must be a real model, on the right hand bone with an offset.
 for class, items in pairs(Config.Consumables) do
@@ -274,7 +274,7 @@ Config.Consumables.food.looped = { anim = { dict = 'd', clip = 'c', flag = 0 }, 
 callback({ class = 'food', item = 'looped' })
 equal(payload.disable, false, 'no restrictions stays false')
 equal(payload.anim.flag, 48, 'flag 0 is upgraded to allow movement')
-print(('qbconsumables movement: %d checks passed'):format(checks))
+print(('kora_consumables movement: %d checks passed'):format(checks))
 
 -- Per-item offsets: soda and the other drink/food items carry non-zero attachments, coffee reuses the emote menu placement.
 local function nonZero(v) return v.x ~= 0.0 or v.y ~= 0.0 or v.z ~= 0.0 end
@@ -289,4 +289,4 @@ local cup = Config.Consumables.drink.coffee
 equal(cup.prop.bone, 28422, 'coffee cup is on the right hand like the emote menu')
 equal(cup.prop.rotation.z, 130.0, 'coffee cup rotation matches the emote menu')
 equal(cup.anim.dict, 'amb@world_human_drinking@coffee@male@idle_a', 'coffee plays the animation the placement was made for')
-print('qbconsumables client: per-item prop offsets ok')
+print('kora_consumables client: per-item prop offsets ok')

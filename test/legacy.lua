@@ -40,7 +40,7 @@ local ok, reason = provided.AddFood('jerky', 35)
 equal(ok, true); equal(reason, 'success')
 equal(Config.Consumables.food.jerky.status.hunger, 35)
 equal(Config.Consumables.food.jerky.label, 'Eating Jerky', 'class defaults are applied')
-equal(sent[#sent].name, 'qbconsumables:register'); equal(sent[#sent].target, -1)
+equal(sent[#sent].name, 'kora_consumables:register'); equal(sent[#sent].target, -1)
 equal(sent[#sent].args[1][1].item, 'jerky')
 equal(select(2, provided.AddFood('jerky', 10)), 'already added')
 equal(select(2, provided.AddDrink('jerky', 10)), 'already added', 'any configured item counts as added')
@@ -95,13 +95,13 @@ equal(Config.Consumables.custom.syrup.event, nil, 'client-trusted server events 
 
 sent = {}
 source = 4
-netEvents['qbconsumables:sync']()
+netEvents['kora_consumables:sync']()
 equal(sent[1].target, 4); equal(#sent[1].args[1] >= 4, true, 'late joiner receives every runtime item')
 sent = {}
-netEvents['qbconsumables:sync']()
+netEvents['kora_consumables:sync']()
 equal(#sent, 0, 'sync is rate limited per player')
 clock = clock + 6000
-netEvents['qbconsumables:sync']()
+netEvents['kora_consumables:sync']()
 equal(#sent, 1)
 
-print(('qbconsumables legacy exports: %d checks passed'):format(checks))
+print(('kora_consumables legacy exports: %d checks passed'):format(checks))

@@ -135,6 +135,21 @@ function ApplyConsumableDefaults(class, item, data)
     end
 end
 
+-- The client applies defaults at script load, before its kora_core registry copy
+-- has arrived (kora_core/modules/registry/client.lua requests it asynchronously),
+-- so a defaulted label may hold only the class prefix ('Eating '). Complete it
+-- from the registry when the item is used.
+function ConsumableLabel(class, item, data)
+    local default = defaults[class]
+    if default and data.label == default.label then
+        local definition = exports.kora_core:getShared('items', item)
+        if definition and definition.label then
+            return default.label .. definition.label
+        end
+    end
+    return data.label
+end
+
 for class, items in pairs(Config.Consumables) do
     for item, data in pairs(items) do
         ApplyConsumableDefaults(class, item, data)

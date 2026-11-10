@@ -116,7 +116,7 @@ Kora.callback.register('kora_consumables:progress', function(data)
     end
     -- An error inside the progress bar must reach the server as a clean failure.
     local started, progress = pcall(Kora.progressbar.start, {
-        label = itemData.label or "Using item",
+        label = ConsumableLabel(data.class, data.item, itemData) or "Using item",
         duration = itemData.duration or 1000,
         useWhileDead = itemData.useWhileDead or false,
         canCancel = itemData.canCancel == nil or itemData.canCancel,

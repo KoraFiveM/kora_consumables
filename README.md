@@ -15,3 +15,5 @@ and applies the status after the client progress bar finishes.
   raised on the client by the server after a completed use. `replenish.server = true` events are not wired,
   because stock fires them from the client.
 - Added items are sent to online clients and to players who join later.
+
+Full documentation: see [docs/](docs/index.md).

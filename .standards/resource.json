@@ -1,0 +1,46 @@
+{
+  "resource": "kora_consumables",
+  "standardsRevision": "2026-11-12.1",
+  "realms": {
+    "client": [
+      "client/client.lua"
+    ],
+    "server": [
+      "server/server.lua"
+    ],
+    "shared": [
+      "shared/Config.lua",
+      "shared/deafaults.lua"
+    ],
+    "manifest": [
+      "fxmanifest.lua"
+    ],
+    "test": [
+      "test/client.lua",
+      "test/legacy.lua",
+      "test/server.lua",
+      "test/startup.lua"
+    ]
+  },
+  "exclude": [
+    ".git/*",
+    ".github/*",
+    ".standards/*",
+    "node_modules/*",
+    "**/node_modules/*",
+    "vendor/*",
+    "**/vendor/*",
+    "web/*",
+    "ui/*",
+    "html/*",
+    "dist/*",
+    "artifacts/*",
+    "runtime/*",
+    "txData/*",
+    "storage/*",
+    "stream/*",
+    "docs/*",
+    "__pycache__/*",
+    "modules/lookup/data/*"
+  ]
+}

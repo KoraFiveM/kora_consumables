@@ -1,6 +1,6 @@
 ---
 title: Troubleshooting
-sidebar_position: 7
+sidebar_position: 9
 ---
 
 # Troubleshooting
@@ -24,7 +24,7 @@ Each player can only have one consumable use in progress. Wait for the current p
 ## The prop is missing or in the wrong place
 
 - Set `Config.Debug = true` to print a line when a prop is skipped because its model is not valid.
-- Adjust `offset`/`rotation` per item, or change `Config.propHand`/`Config.propBone`. See [Configuration](./configuration.md#props). These are read at resource start, so restart the resource after changing them.
+- Adjust `offset`/`rotation` per item, or change `Config.propHand`/`Config.propBone`. See [Configuration](./api/configuration.md#props). These are read at resource start, so restart the resource after changing them.
 
 ## Drunk effect or notification is unwanted
 

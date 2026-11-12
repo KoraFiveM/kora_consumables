@@ -1,11 +1,11 @@
 ---
 title: Events
-sidebar_position: 6
+sidebar_position: 8
 ---
 
 # Events
 
-`kora_consumables` has no public API events. The net events and callback below are part of its own client-server protocol and are documented for reference. Do not trigger them from other resources. To add consumables, use the [exports](./exports.md).
+`kora_consumables` has no public API events. The net events and callback below are part of its own client-server protocol and are documented for reference. Do not trigger them from other resources. To add consumables, use the [exports](./api/server-exports.md).
 
 ## Net events
 

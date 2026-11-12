@@ -3,7 +3,7 @@ game 'gta5'
 lua54 'yes'
 author 'Kakarot'
 description 'its in the name, just read'
-version '0.2.0'
+version '0.2.1'
 
 dependency 'kora_lib'
 dependency 'kora_core'

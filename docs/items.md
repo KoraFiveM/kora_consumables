@@ -1,6 +1,6 @@
 ---
 title: Items
-sidebar_position: 4
+sidebar_position: 7
 ---
 
 # Items
@@ -67,7 +67,7 @@ The repository also includes a QBCore-format item list and images. These files a
 ## Adding an item
 
 1. Make sure the item exists as a shared item in `kora_core` and set `useable = true`.
-2. Add it to the matching class in `Config.Consumables` (see [Configuration](./configuration.md)):
+2. Add it to the matching class in `Config.Consumables` (see [Configuration](./api/configuration.md)):
 
    ```lua
    Config.Consumables.food.burger = {
@@ -77,7 +77,7 @@ The repository also includes a QBCore-format item list and images. These files a
 
 3. Restart the resource.
 
-Another resource can add an item at runtime with the [exports](./exports.md) instead of editing the config.
+Another resource can add an item at runtime with the [exports](./api/server-exports.md) instead of editing the config.
 
 ## Limited uses
 

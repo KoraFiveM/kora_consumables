@@ -1,6 +1,6 @@
 ---
 title: How it works
-sidebar_position: 2
+sidebar_position: 6
 ---
 
 # How it works
@@ -11,7 +11,7 @@ sidebar_position: 2
 2. `shared/deafaults.lua` (the filename is misspelled in the repo) fills missing fields for each configured item from its class defaults. It also declares `Config.applyStatusOn` as a live kora_lib config enum and registers the whole `Config` with `Kora.config.adopt`.
 3. The server registers each configured item with `exports.kora_core:createUseable`. Before that, it registers a `cigarette` shared item if no resource has defined one.
 4. `kora_inventory` has its own instant handlers for some of the same items, such as `water_bottle`, `sandwich` and `beer`. To keep this resource's handlers active, the server registers all useables again whenever `kora_inventory` starts.
-5. When the client script starts, it sends `kora_consumables:sync` to the server. The server replies with any items that other resources added at runtime through the [exports](./exports.md).
+5. When the client script starts, it sends `kora_consumables:sync` to the server. The server replies with any items that other resources added at runtime through the [exports](./api/server-exports.md).
 
 ## Using an item
 

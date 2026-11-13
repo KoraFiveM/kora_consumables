@@ -9,7 +9,7 @@ local function buzzed(duration)
     SetTimecycleModifierStrength(0.6)
     ShakeGameplayCam('DRUNK_SHAKE', 0.6)
     if Config.DrunkNotify ~= false and Kora and Kora.notify and Kora.notify.send then
-        Kora.notify.send({ title = 'Drunk', message = "Congratulations! You've unlocked drunk mode.", type = 'info' })
+        Kora.notify.send({ title = Kora.lang('notify.drunk_title'), message = Kora.lang('notify.drunk_unlocked'), type = 'info' })
     end
     local walk = Config.DrunkWalk ~= false and Config.DrunkWalkClipset or nil
     if walk then
@@ -116,7 +116,7 @@ Kora.callback.register('kora_consumables:progress', function(data)
     end
     -- An error inside the progress bar must reach the server as a clean failure.
     local started, progress = pcall(Kora.progressbar.start, {
-        label = ConsumableLabel(data.class, data.item, itemData) or "Using item",
+        label = ConsumableLabel(data.class, data.item, itemData) or Kora.lang('progress.using'),
         duration = itemData.duration or 1000,
         useWhileDead = itemData.useWhileDead or false,
         canCancel = itemData.canCancel == nil or itemData.canCancel,

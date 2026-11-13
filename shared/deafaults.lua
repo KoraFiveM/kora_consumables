@@ -1,7 +1,7 @@
 
 local defaults = {
     drink = {
-        label = 'Drinking ',
+        label = Kora.lang('progress.drink'),
         duration = 4000,
         anim = {
             dict = "mp_player_intdrink",
@@ -20,7 +20,7 @@ local defaults = {
         status = {thirst = 20}
     },
     food = {
-        label = 'Eating ',
+        label = Kora.lang('progress.food'),
         duration = 4000,
         anim = {
             dict = "mp_player_inteat@burger",
@@ -40,7 +40,7 @@ local defaults = {
         status = {hunger = 20}
     },
     smoke = {
-        label = 'Smoking ',
+        label = Kora.lang('progress.smoke'),
         duration = 4000,
         anim = {
             dict = "mp_player_int_uppersmoke",
@@ -51,7 +51,7 @@ local defaults = {
         effects = {visual = 'alien', duration = 15000}
     },
     liquor = {
-        label = 'Drinking ',
+        label = Kora.lang('progress.liquor'),
         duration = 4000,
         anim = {
             dict = "amb@world_human_drinking@coffee@male@idle_a",
@@ -101,7 +101,7 @@ if not Config.Consumables then
 end
 
 defaults.custom = {
-    label = 'Using ',
+    label = Kora.lang('progress.custom'),
     duration = 4000,
     disable = {move = true, combat = true, vehicle = true}
 }

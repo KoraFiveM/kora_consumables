@@ -1,7 +1,7 @@
 fx_version 'cerulean'
 game 'gta5'
 lua54 'yes'
-author 'Kakarot'
+author 'Kora'
 description 'its in the name, just read'
 version '0.2.1'
 
@@ -18,6 +18,8 @@ server_script 'server/**.lua'
 client_scripts {
     'client/**.lua'
 }
+
+files { 'locales/*.lua' }
 
 -- kora_qa: Gherkin test scenarios (converted legacy tests), see [kora]/kora_qa/README.md
 qa_feature 'tests/*.feature'

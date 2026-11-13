@@ -97,17 +97,7 @@ local function registerUseables()
     end
 end
 
--- Config.Consumables.smoke.cigarette has no item in the shared items, so it could never be held or
--- used. Register it here unless another resource already defines it.
-local function registerCigarette()
-    if exports.kora_core:getShared('items', 'cigarette') then return end
-    exports.kora_core:registerShared('items', 'cigarette', {
-        name = 'cigarette', label = 'Cigarette', weight = 10, type = 'item', image = 'cigarette.png',
-        unique = false, useable = true, shouldClose = true, description = 'A single cigarette.',
-    })
-end
 
-registerCigarette()
 registerUseables()
 
 -- kora_inventory ships instant built-in handlers for some of the same items

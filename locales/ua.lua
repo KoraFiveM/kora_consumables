@@ -1,18 +1,18 @@
 return {
+    notify = {
+        drunk_title = "Сп'яніння",
+        drunk_unlocked = "Вітаємо! Ви розблокували режим сп'яніння.",
+    },
     progress = {
-        using = "Використання пункту",
-        drink = "Пити",
-        food = "Енергія",
-        smoke = "Паління",
-        custom = "Використання",
-        liquor = "Пити",
+        drink = 'Пиття: ',
+        food = 'Їжа: ',
+        smoke = 'Куріння: ',
+        liquor = 'Пиття: ',
+        custom = 'Використання: ',
+        using = 'Використання предмета',
     },
     item = {
-        cigarette_description = "Одиночна сигарета.",
-        cigarette = "Цигарка",
-    },
-    notify = {
-        drunk_title = "П'яний",
-        drunk_unlocked = "Вітаємо! Ви розблокували п'яний режим.",
+        cigarette = 'Сигарета',
+        cigarette_description = 'Одна сигарета.',
     },
 }

@@ -84,45 +84,17 @@ CreateThread(function()
         return
     end
 
-    local storedClasses = {}
-    for _, row in ipairs(classRows or {}) do storedClasses[row.class] = row end
-    for class, data in pairs(Config.ConsumableClasses) do
-        if not storedClasses[class] then
-            local seeded, err = pcall(Kora.sql.update, [[
-                INSERT INTO `kora_consumables_classes` (`class`, `data`, `enabled`)
-                VALUES (?, ?, 1)
-            ]], {class, json.encode(data)})
-            if not seeded then Kora.logging.warn('data.class_seed_failed', 'Could not seed a consumable class', {class = class, error = tostring(err)}) end
-        end
-    end
     for _, row in ipairs(classRows or {}) do
         if tonumber(row.enabled) == 0 then
             Config.ConsumableClasses[row.class] = nil
         else
             local decodedOk, data = pcall(json.decode, row.data or '{}')
             if decodedOk and type(data) == 'table' then
-                Config.ConsumableClasses[row.class] = data
+                local classData = Config.ConsumableClasses[row.class] or {}
+                for key, value in pairs(data) do classData[key] = value end
+                Config.ConsumableClasses[row.class] = classData
             else
                 Kora.logging.warn('data.invalid_class_json', 'Skipping class with invalid database data', {class = row.class})
-            end
-        end
-    end
-
-    local stored = {}
-    for _, row in ipairs(rows or {}) do
-        stored[row.class .. '\0' .. row.item] = row
-    end
-
-    -- Seed the existing configuration once; thereafter the database is authoritative.
-    for class, items in pairs(Config.Consumables) do
-        for item, data in pairs(items) do
-            local key = class .. '\0' .. item
-            if not stored[key] then
-                local saved, err = pcall(Kora.sql.update, [[
-                    INSERT INTO `kora_consumables_items` (`class`, `item`, `data`, `enabled`)
-                    VALUES (?, ?, ?, 1)
-                ]], { class, item, json.encode(data) })
-                if not saved then Kora.logging.warn('data.seed_failed', 'Could not seed a default consumable', { item = item, error = tostring(err) }) end
             end
         end
     end

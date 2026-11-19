@@ -54,7 +54,7 @@ Kora Consumables makes food, drink, liquor and smoke items usable. The player ho
    }
    ```
 
-5. **Database setup** — `kora_sql` creates or upgrades the `kora_consumables_items` table when the resource starts. Existing `Config.Consumables` entries are seeded automatically the first time. No manual import is needed.
+5. **Database setup** — The schema includes seed rows for the shipped items and class defaults. `kora_sql` inserts missing rows when the resource starts, so a fresh install receives the resource's catalog automatically. Existing database rows stay authoritative and are not overwritten by the seed data.
 
 6. **Make sure inventory images exist** — The in-game creator can register new shared items in `kora_core`; place any custom image in the inventory's image directory. Configured items already defined in `kora_core` continue to work as before.
 
@@ -82,7 +82,7 @@ Kora Consumables makes food, drink, liquor and smoke items usable. The player ho
 
 ## Database
 
-The `kora_consumables_items` table stores class, item key, complete configuration JSON and an enabled flag. `kora_consumables_classes` stores editable class defaults. Disabled rows are retained so deleted built-in entries do not return during seeding. Status changes are written through `kora_core` player metadata.
+The `kora_consumables_items` table stores class, item key, complete configuration JSON and an enabled flag. `kora_consumables_classes` stores editable class defaults. The schema ships seed rows for the default catalog; inserts preserve existing rows, including disabled rows, so saved edits and deletions remain authoritative. Class labels continue to come from the active locale when no saved label overrides them. Status changes are written through `kora_core` player metadata.
 
 ## Commands
 

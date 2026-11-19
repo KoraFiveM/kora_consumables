@@ -31,7 +31,7 @@ Server side, `server/server.lua`: per-player lock in `registerUseable`; finish-t
 
 ## Developer responsibility
 
-Only server resources can call the exports, but they do not check the caller, so never wire them to player input. `replenish.event` is trusted: the event name comes from your config or export call and is fired on the client without arguments other than the item name. The items and their shared definitions (including `useable = true`) must exist. The `kora_consumables:register` event is a plain client event: it only fills the local config, but a modified client can change its own copy of the config. The server still decides consumption and status from its own `Config.Consumables`.
+Only server resources can call the exports, but they do not check the caller, so never wire them to player input. `replenish.event` is trusted: the event name comes from the export call and is fired on the client without arguments other than the item name. The shared item must exist. The `kora_consumables:register` event is a plain client event: it only updates the local catalog, but a modified client can change its own copy. The server still decides consumption and status from its own database-backed catalog.
 
 ## Status keys and Kora Core
 

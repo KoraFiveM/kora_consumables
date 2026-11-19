@@ -12,13 +12,13 @@ Namespace: `exports.kora_consumables` · Source: `server/server.lua (exports(...
 
 ## How it works
 
-All four go through the private `legacyAdd(export, name, value)`. It rejects the call if the name is invalid, if the name is already a key in any class table of `Config.Consumables`, if the value is not valid for the class, or if the shared item does not exist. On success it stores the entry in `Config.Consumables[class][name]`, runs `ApplyConsumableDefaults(class, name, data)`, registers the useable with Kora Core, records the entry for late joiners and broadcasts it to every client with `TriggerClientEvent('kora_consumables:register', -1, ...)`. A player who joins later receives the stored entries through `kora_consumables:sync`.
+All four go through the private `legacyAdd(export, name, value)`. It rejects the call if the name is invalid, if the name is already in the active database-backed catalog, if the value is not valid for the class, or if the shared item does not exist. On success it saves the entry to SQL, updates the in-memory `Config.Consumables` catalog, applies the database class defaults, registers the useable with Kora Core, and synchronizes it to clients. A player who joins later receives the active catalog through `kora_consumables:sync`.
 
 ## Terms used on this page
 
 | Term | Meaning |
 | --- | --- |
-| class | The key under `Config.Consumables`: `food`, `drink`, `smoke`, `liquor` or `custom`. It selects the defaults. The exports map to `food`, `drink`, `liquor` and `custom`; `smoke` can only be configured in `Config`. |
+| class | The database catalog class: `food`, `drink`, `smoke`, `liquor` or `custom`. It selects the defaults. The exports map to `food`, `drink`, `liquor` and `custom`; create smokeables through the creator. |
 | replenish | A number from 0 to 100 added to hunger (food) or thirst (drink, alcohol) through `incrementMetaData`, clamped to 0-100. |
 | useable | An item handler registered with `exports.kora_core:createUseable`. It runs when a player uses the item from the inventory. |
 
@@ -34,7 +34,7 @@ Registers a food item at runtime in the `food` class. The item gets the food def
 
 | Name | Type | Description |
 | --- | --- | --- |
-| `name` | string | Required. Item name. Must be a non-empty string, must not already appear under any class in `Config.Consumables`, and must exist in the Kora shared items. |
+| `name` | string | Required. Item name. Must be a non-empty string, must not already appear in the active catalog, and must exist in the Kora shared items. |
 | `replenish` | number | Required. Hunger added on use. Must be a finite number from 0 to 100 inclusive (NaN, negative or above 100 is rejected). Values are added, not set, and the metadata is clamped 0-100. |
 
 **Returns**
@@ -68,7 +68,7 @@ Registers a drink item at runtime in the `drink` class. Adds `replenish` to thir
 
 | Name | Type | Description |
 | --- | --- | --- |
-| `name` | string | Required. Item name. Must be a non-empty string, must not already appear under any class in `Config.Consumables`, and must exist in the Kora shared items. |
+| `name` | string | Required. Item name. Must be a non-empty string, must not already appear in the active catalog, and must exist in the Kora shared items. |
 | `replenish` | number | Required. Thirst added on use. Must be a finite number from 0 to 100 inclusive (NaN, negative or above 100 is rejected). Values are added, not set, and the metadata is clamped 0-100. |
 
 **Returns**
@@ -101,7 +101,7 @@ Registers an alcoholic drink at runtime in the `liquor` class. Adds `replenish` 
 
 | Name | Type | Description |
 | --- | --- | --- |
-| `name` | string | Required. Item name. Must be a non-empty string, must not already appear under any class in `Config.Consumables`, and must exist in the Kora shared items. |
+| `name` | string | Required. Item name. Must be a non-empty string, must not already appear in the active catalog, and must exist in the Kora shared items. |
 | `replenish` | number | Required. Thirst added on use. Must be a finite number from 0 to 100 inclusive (NaN, negative or above 100 is rejected). Values are added, not set, and the metadata is clamped 0-100. |
 
 **Returns**
@@ -183,9 +183,9 @@ There is no export to remove or change an item, to read the configuration, or to
   - `'already added'`: the item is already configured in any class, including items from `Config.lua`. Configured items cannot be overridden.
   - `'item does not exist'`: no `kora_core` shared item has this name.
 - **Replenish value**: `replenish` must be a number from 0 to 100. Other values, including NaN and negative numbers, are rejected.
-- **Class defaults**: the class defaults are applied to the new entry. See [Configuration](./configuration.md#class-defaults).
+- **Class defaults**: database class defaults are applied to the new entry. See [Creator](../creator.md).
 - **Client sync**: the entry is sent to all online clients with `kora_consumables:register`. Players who join later receive it through `kora_consumables:sync`.
-- **Lifetime**: runtime additions are kept only in memory and disappear when the resource restarts.
+- **Lifetime**: runtime additions are saved to SQL and remain after the resource restarts.
 
 ## AddCustom field mapping
 

@@ -1,4 +1,3 @@
-
 local buzzedToken = 0
 
 -- Drunk screen effect for alcohol; kora_lib has no buzzed visual, so it is applied here.
@@ -9,13 +8,15 @@ local function buzzed(duration)
     SetTimecycleModifierStrength(0.6)
     ShakeGameplayCam('DRUNK_SHAKE', 0.6)
     if Config.DrunkNotify ~= false and Kora and Kora.notify and Kora.notify.send then
-        Kora.notify.send({ title = Kora.lang('notify.drunk_title'), message = Kora.lang('notify.drunk_unlocked'), type = 'info' })
+        Kora.notify.send({title = Kora.lang('notify.drunk_title'), message = Kora.lang('notify.drunk_unlocked'), type = 'info'})
     end
     local walk = Config.DrunkWalk ~= false and Config.DrunkWalkClipset or nil
     if walk then
         RequestAnimSet(walk)
         local timeout = GetGameTimer() + 5000
-        while not HasAnimSetLoaded(walk) and GetGameTimer() < timeout do Wait(0) end
+        while not HasAnimSetLoaded(walk) and GetGameTimer() < timeout do
+            Wait(0)
+        end
         if HasAnimSetLoaded(walk) then
             SetPedMovementClipset(PlayerPedId(), walk, 1.0)
         else
@@ -27,7 +28,9 @@ local function buzzed(duration)
         if token ~= buzzedToken then return end
         ClearTimecycleModifier()
         StopGameplayCamShaking(true)
-        if walk then ResetPedMovementClipset(PlayerPedId(), 1.0) end
+        if walk then
+            ResetPedMovementClipset(PlayerPedId(), 1.0)
+        end
     end)
 end
 
@@ -63,25 +66,21 @@ local function usableProp(prop, item)
         return prop
     end
     if Config.Debug then
-        Kora.logging.debug('consume.prop_skipped', 'Skipping prop because its model is invalid', {
-            item = tostring(item),
-            model = tostring(model),
-        })
+        Kora.logging.debug('consume.prop_skipped', 'Skipping prop because its model is invalid', {item = tostring(item), model = tostring(model)})
     end
     return nil
 end
 
--- Whether the player may walk while using this item: a per-item allowMovement wins,
--- then Config.allowMovement (boolean, or a table keyed by class), default true.
+-- Whether the player may walk while using this item: item setting, then database class setting, default true.
 local function movementAllowed(itemData, class)
     if itemData.allowMovement ~= nil then
         return itemData.allowMovement == true
     end
-    local setting = Config.allowMovement
-    if type(setting) == 'table' then
-        setting = setting[class]
+    local classDefaults = Config.ConsumableClasses and Config.ConsumableClasses[class]
+    if classDefaults and classDefaults.allowMovement ~= nil then
+        return classDefaults.allowMovement == true
     end
-    return setting ~= false
+    return true
 end
 
 -- Upper-body (16) + allow player control (32) keep the legs free; flag 0/1 would lock the body.
@@ -91,25 +90,57 @@ local function movableAnim(anim)
         return anim
     end
     local copy = {}
-    for key, value in pairs(anim) do copy[key] = value end
+    for key, value in pairs(anim) do
+        copy[key] = value
+    end
     copy.flag = (copy.flag or 1) | UPPER_BODY_CONTROL
     return copy
 end
 
 Kora.callback.register('kora_consumables:progress', function(data)
-    assert(data and data.class and data.item, "Invalid data passed to kora_consumables:progress")
-    local itemData = Config.Consumables[data.class] and Config.Consumables[data.class][data.item] or nil
+    assert(data and data.class and data.item, 'Invalid data passed to kora_consumables:progress')
+    local classItems = Config.Consumables[data.class]
+    local itemData = classItems and classItems[data.item]
     if not itemData then
         return false
     end
+    local animation = itemData.animation
     local prop = usableProp(itemData.prop, data.item)
+    local progressProp
+    local progressProps
+    if prop then
+        if prop.coords then
+            progressProp = prop
+        else
+            progressProps = {prop}
+        end
+    end
     local disable = itemData.disable
-    if disable == nil then disable = itemData.disableMovement or false end
+    if disable == nil then
+        disable = itemData.disableMovement or false
+    end
     if type(disable) == 'table' and disable.vehicle ~= nil and disable.car == nil then
         disable = Kora.util.deepClone(disable)
         disable.car = disable.vehicle
     end
     local anim = itemData.anim or nil
+    local emote = itemData.emote
+    local propTwo = usableProp(itemData.proptwo, data.item)
+    if type(animation) == 'table' then
+        if animation.mode == 'emote' then
+            emote = animation.emote
+            anim, progressProp, progressProps = nil, nil, nil
+            propTwo = nil
+        elseif animation.mode == 'animation' then
+            emote = nil
+            anim = {dict = animation.dict, clip = animation.clip, flag = animation.flag}
+            progressProp = usableProp(animation.prop or itemData.prop, data.item)
+            propTwo = usableProp(animation.proptwo or itemData.proptwo, data.item)
+            progressProps = nil
+        end
+    elseif emote then
+        anim, progressProp, progressProps, propTwo = nil, nil, nil, nil
+    end
     if movementAllowed(itemData, data.class) then
         if type(disable) == 'table' and disable.move then
             disable = Kora.util.deepClone(disable)
@@ -124,17 +155,15 @@ Kora.callback.register('kora_consumables:progress', function(data)
         useWhileDead = itemData.useWhileDead or false,
         canCancel = itemData.canCancel == nil or itemData.canCancel,
         anim = anim,
-        prop = prop and prop.coords and prop or nil,
-        props = prop and not prop.coords and { prop } or nil,
-        emote = itemData.emote or nil,
+        prop = progressProp,
+        proptwo = propTwo,
+        props = progressProps,
+        emote = emote,
         disable = disable,
     })
     if not started then
         if Config.Debug then
-            Kora.logging.debug('consume.progress_failed', 'Progress did not start', {
-                item = tostring(data.item),
-                progress = tostring(progress),
-            })
+            Kora.logging.debug('consume.progress_failed', 'Progress did not start', {item = tostring(data.item), progress = tostring(progress)})
         end
         return false
     end
@@ -146,11 +175,26 @@ end)
 RegisterNetEvent('kora_consumables:register', function(entries)
     if type(entries) ~= 'table' then return end
     for _, entry in ipairs(entries) do
-        if type(entry) == 'table' and type(entry.class) == 'string' and type(entry.item) == 'string' and type(entry.data) == 'table' then
+        if type(entry) == 'table'
+            and type(entry.class) == 'string'
+            and type(entry.item) == 'string'
+            and type(entry.data) == 'table'
+        then
             Config.Consumables[entry.class] = Config.Consumables[entry.class] or {}
             Config.Consumables[entry.class][entry.item] = entry.data
         end
     end
+end)
+
+RegisterNetEvent('kora_consumables:catalog', function(catalog, classes)
+    if type(catalog) ~= 'table' then return end
+    for class in pairs(Config.Consumables) do Config.Consumables[class] = nil end
+    for class, items in pairs(catalog) do
+        if type(class) == 'string' and type(items) == 'table' then
+            Config.Consumables[class] = items
+        end
+    end
+    if type(classes) == 'table' then Config.ConsumableClasses = classes end
 end)
 
 CreateThread(function()

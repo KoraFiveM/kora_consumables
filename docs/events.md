@@ -11,8 +11,9 @@ sidebar_position: 8
 
 | Name | Direction | Payload | Description |
 | --- | --- | --- | --- |
-| `kora_consumables:sync` | client to server | none | **Internal.** Sent once when the client script starts. The server replies with `kora_consumables:register` containing all items added at runtime. It does not reply if none were added. Replies are limited to one every 5 seconds per player, and the limit is reset when the player drops. |
-| `kora_consumables:register` | server to client | array of `{ class, item, data }` | **Internal.** Adds runtime consumables to the client's `Config.Consumables`. It is sent to all clients when an export adds an item, and to a single client in reply to `sync`. Invalid entries are ignored. |
+| `kora_consumables:sync` | client to server | none | **Internal.** Sent once when the client script starts. The server replies with the full `kora_consumables:catalog`. Replies are limited to one every 5 seconds per player, and the limit is reset when the player drops. |
+| `kora_consumables:catalog` | server to client | item and class tables | **Internal.** Replaces the client's runtime catalog. Sent to all clients after creator edits or export additions, and to a joining client in reply to `sync`. |
+| `kora_consumables:register` | server to client | array of `{ class, item, data }` | **Internal legacy event.** Applies incremental entries to the client's runtime catalog. Current server code broadcasts the full catalog instead. Invalid entries are ignored. |
 
 ## Callback
 
@@ -24,7 +25,7 @@ sidebar_position: 8
 
 ## Item events
 
-If an item has an `event` field in the config, or a `replenish.event` added with `AddCustom`, the server sends that client event to the player after a completed use:
+If an item has an `event` field saved in its database data, or a `replenish.event` added with `AddCustom`, the server sends that client event to the player after a completed use:
 
 ```lua
 -- client, in your own resource

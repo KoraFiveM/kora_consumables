@@ -5,9 +5,9 @@ sidebar_position: 7
 
 # Items
 
-Every key in `Config.Consumables` is registered as a useable item. The item must also exist as a `kora_core` shared item, or players cannot hold it.
+The server loads consumables from `kora_consumables_items` and registers each active row as a useable item. Fresh installs receive the shipped catalog from the seed rows in `server/schema.lua`. The item must also exist as a `kora_core` shared item, or players cannot hold it.
 
-## Default consumables
+## Shipped consumables
 
 The table below shows the values each item uses after class defaults are applied. Durations are 4000 ms for all of them.
 
@@ -67,17 +67,10 @@ The repository also includes a QBCore-format item list and images. These files a
 ## Adding an item
 
 1. Make sure the item exists as a shared item in `kora_core` and set `useable = true`.
-2. Add it to the matching class in `Config.Consumables` (see [Configuration](./api/configuration.md)):
+2. Open `/consumableCreator` as a Kora admin, create the consumable, choose its class and set its behavior.
+3. Save. The resource stores and synchronizes the new database row.
 
-   ```lua
-   Config.Consumables.food.burger = {
-       status = {hunger = 35},
-   }
-   ```
-
-3. Restart the resource.
-
-Another resource can add an item at runtime with the [exports](./api/server-exports.md) instead of editing the config.
+Another resource can add an item through the [exports](./api/server-exports.md).
 
 ## Limited uses
 

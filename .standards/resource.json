@@ -3,10 +3,14 @@
   "standardsRevision": "2026-11-12.2",
   "realms": {
     "client": [
-      "client/client.lua"
+      "client/client.lua",
+      "client/creator.lua"
     ],
     "server": [
-      "server/server.lua"
+      "server/schema.lua",
+      "server/data.lua",
+      "server/server.lua",
+      "server/creator.lua"
     ],
     "shared": [
       "shared/Config.lua",

@@ -7,17 +7,22 @@ version '0.2.1'
 
 dependency 'kora_lib'
 dependency 'kora_core'
+dependency 'kora_sql'
 
 shared_script {
     '@kora_lib/init.lua',
     'shared/**.lua'
 }
 
-server_script 'server/**.lua'
-
-client_scripts {
-    'client/**.lua'
+server_scripts {
+    '@kora_sql/init.lua',
+    'server/schema.lua',
+    'server/data.lua',
+    'server/server.lua',
+    'server/creator.lua',
 }
+
+client_scripts { 'client/client.lua', 'client/creator.lua' }
 
 files { 'locales/*.lua' }
 

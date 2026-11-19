@@ -6,7 +6,7 @@ sidebar_position: 3
 
 # Internals and local functions
 
-Everything in this module is either a global of this resource or a file-local function. None of it is exported. It is documented so you know what the exports and the config actually do. The other private functions are listed in the table below.
+Everything in this module is either a global of this resource or a file-local function. None of it is exported. It is documented so you know what the exports and database catalog actually do. The other private functions are listed in the table below.
 
 Namespace: `kora_consumables` · Source: `shared/deafaults.lua, server/server.lua, client/client.lua`
 
@@ -19,7 +19,9 @@ Namespace: `kora_consumables` · Source: `shared/deafaults.lua, server/server.lu
 | applyUse(src, item, data, itemData) | server | server/server.lua | `takeItem`, then `addStatus`, then `TriggerClientEvent(data.event, src, item)` when `data.event` is set. |
 | useConsumable(src, category, item, data, itemData) | server | server/server.lua | Runs the progress callback and the speed check (`FINISH_TOLERANCE` = 250 ms), or applies first when `Config.applyStatusOn == 'start'`. |
 | registerUseable(category, item, data) | server | server/server.lua | Registers the Kora Core useable and wraps it in the per-player `using` lock; errors are re-raised after the lock is released. |
-| registerUseables() | server | server/server.lua | Registers every item in `Config.Consumables`. Called at load and when `kora_inventory` starts. |
+| upsertConsumable(category, item, data) | server | server/server.lua | Replaces the in-memory catalog row, re-registers its Kora Core useable handler, and broadcasts the full catalog to clients. |
+| syncConsumableCatalog() | server | server/server.lua | Broadcasts the active item and class catalog to all clients. |
+| registerUseables() | server | server/server.lua | Registers every active item loaded from the SQL catalog. Called after database loading and when `kora_inventory` starts. |
 | registerCigarette() | server | server/server.lua | Registers a shared item `cigarette` (weight 10, useable) if `exports.kora_core:getShared('items', 'cigarette')` is empty. |
 | amount(value) | server | server/server.lua | Returns the value only when it is a number, not NaN, from 0 to 100; otherwise nil. |
 | vec(value) | server | server/server.lua | Turns a table or vector3 with numeric x, y, z into `{x, y, z}`; otherwise nil. |
@@ -28,26 +30,26 @@ Namespace: `kora_consumables` · Source: `shared/deafaults.lua, server/server.lu
 | buzzed(duration) | client | client/client.lua | Applies the `drug_drive_blend01` timecycle (strength 0.6), `DRUNK_SHAKE` camera shake, optional notification and drunk walking style; clears them after `duration`. A newer call cancels the older timer through `buzzedToken`. |
 | addVisuals(effect) | client | client/client.lua | Maps `effect.visual` to `buzzed` (local), or `Kora.visuals.alien`, `coke`, `crack`, `meth`, `trevor`. `'none'` or a missing effect does nothing. Duration defaults to 15000. |
 | usableProp(prop, item) | client | client/client.lua | Returns nil for a prop whose model is invalid when `Config.skipInvalidProps` is not false. |
-| movementAllowed(itemData, class) | client | client/client.lua | Resolves per-item `allowMovement`, then `Config.allowMovement` (boolean or per-class table), default true. |
+| movementAllowed(itemData, class) | client | client/client.lua | Resolves per-item `allowMovement`, then database class `allowMovement`, default true. |
 | movableAnim(anim) | client | client/client.lua | Returns a copy of the animation with flag `(flag or 1) \| 48`, so the legs stay free. |
 
 ## How it works
 
-`ApplyConsumableDefaults` and `ConsumableLabel` are the only function globals. `ConsumableLabel(class, item, data)` is used by the client to complete a defaulted label from the kora_core item registry when the item is used. The default tables themselves (`defaults`, `classSetting`, `resolveProp`) are file-local to `shared/deafaults.lua`. If `Config.Consumables` is nil when that file loads, it waits in a `repeat Wait(20)` loop until it exists.
+`ApplyConsumableDefaults`, `ConsumableClassLabel` and `ConsumableLabel` are shared function globals. `ApplyConsumableDefaults` fills missing values from the loaded SQL class row; it does not read an item catalog from `Config`. `ConsumableClassLabel` supplies a localized label when a seed row has no saved class label. The resolver helpers are file-local to `shared/deafaults.lua`.
 
 ## Functions
 
-The main global function of the resource (the other is `ConsumableLabel`).
+The main global catalog helper, alongside `ConsumableClassLabel` and `ConsumableLabel`.
 
 ### `ApplyConsumableDefaults(class, item, data) -> nil`
 
-A global function defined in `shared/deafaults.lua` (not an export, so other resources cannot call it). Fills the missing fields of one item with the class defaults. It runs for every configured item at load, in both client and server, and again inside `legacyAdd` for runtime items.
+A global function defined in `shared/deafaults.lua` (not an export, so other resources cannot call it). Fills the missing fields of one item from the loaded database class row. It runs while the server loads SQL item rows and again when legacy exports add a runtime item.
 
 **Parameters**
 
 | Name | Type | Description |
 | --- | --- | --- |
-| `class` | string | Required. A class with defaults: `food`, `drink`, `smoke`, `liquor` or `custom`. An unknown class raises an error because the class default is indexed. |
+| `class` | string | Required. Uses the named database class, then falls back to the database `custom` class when the class is missing. |
 | `item` | string | Required. Item name, used to build the default label from the shared item label. |
 | `data` | table | Required. The item table. It is modified in place. |
 
@@ -58,7 +60,7 @@ No value.
 **Example**
 
 ```lua
--- Effect of the defaults on Config.Consumables.liquor.beer = {} after load:
+-- Example effect when a database row has only status = {thirst = 15}:
 -- label    'Drinking <shared item label>'
 -- duration 4000
 -- anim     { dict = 'amb@world_human_drinking@coffee@male@idle_a', clip = 'idle_c' }

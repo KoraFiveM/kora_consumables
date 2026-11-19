@@ -13,7 +13,7 @@ sidebar_position: 1
 - **Effects applied on completion (default)**: by default, the item is consumed and its status applied only after the progress bar finishes. If the player cancels, nothing is consumed or applied. You can change this with the `applyStatusOn` option.
 - **Anti-spam and timing check**: a player can only have one consumable use in progress at a time. If a use reports completion faster than its configured duration allows, the server ignores it.
 - **Status changes**: `hunger`, `thirst`, `stress`, `health`, `armor`, `drunk` and `high` metadata are changed and clamped to 0-100.
-- **Four item classes**: `drink`, `food`, `smoke` and `liquor`. Each class has default labels, durations, animations, props, control restrictions, status changes and effects, and each item can override them. Runtime additions from `AddCustom` use a fifth class, `custom`.
+- **Database-backed classes**: `drink`, `food`, `smoke`, `liquor` and `custom` have editable labels, durations, animations, props, control restrictions, status changes and effects. Each item can override its class values in the creator.
 - **Hand props**: each class has a configured default hand and offsets for both hands. The hand and bone can be overridden per class or per item. Props with invalid models are skipped by default so the item can still be used.
 - **Walk while consuming**: by default, the animation plays on the upper body and the player can keep walking. Combat and vehicle entry stay blocked. This can be configured globally, per class or per item.
 - **Screen effects**: liquor uses a built-in "buzzed" effect: a timecycle modifier, camera shake, an optional drunk walk and an optional notification. Smokeables use the kora_lib visuals `alien`, `coke`, `crack`, `meth` or `trevor`.
@@ -34,5 +34,5 @@ sidebar_position: 1
 - [API reference](./api/index.md): overview of the API pages.
   - [Server exports](./api/server-exports.md): `AddFood`, `AddDrink`, `AddAlcohol`, `AddCustom` and the `qb-smallresources` layer.
   - [Internals and local functions](./api/internals.md): local functions and `ApplyConsumableDefaults`.
-  - [Configuration](./api/configuration.md): every `Config` option, item fields, class defaults and props.
+  - [Configuration](./api/configuration.md): resource-wide settings and how the database catalog is seeded and edited.
   - [Use flow, security and edge cases](./api/workflow.md): validation, built-in checks and edge cases.

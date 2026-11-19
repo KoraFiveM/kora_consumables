@@ -93,6 +93,17 @@ function registerUseable(category, item, data)
     end)
 end
 
+function syncConsumableCatalog()
+    TriggerClientEvent('kora_consumables:catalog', -1, Config.Consumables, Config.ConsumableClasses)
+end
+
+function upsertConsumable(category, item, data)
+    Config.Consumables[category] = Config.Consumables[category] or {}
+    Config.Consumables[category][item] = data
+    registerUseable(category, item, data)
+    syncConsumableCatalog()
+end
+
 local function registerUseables()
     for category, v in pairs(Config.Consumables) do
         for item, data in pairs(v) do
@@ -121,7 +132,6 @@ end)
 -- flow above, so a use needs the item held and the server removes it.
 local legacyClass = {AddFood = 'food', AddDrink = 'drink', AddAlcohol = 'liquor', AddCustom = 'custom'}
 local legacyStatus = {food = 'hunger', drink = 'thirst', liquor = 'thirst'}
-local added = {}
 local lastSync = {}
 local SYNC_COOLDOWN = 5000
 
@@ -228,11 +238,7 @@ local function legacyAdd(export, name, value)
     ApplyConsumableDefaults(class, name, data)
     local saved, saveError = SaveConsumable(class, name, data)
     if not saved then return false, saveError end
-    Config.Consumables[class] = Config.Consumables[class] or {}
-    Config.Consumables[class][name] = data
-    added[#added + 1] = {class = class, item = name, data = data}
-    registerUseable(class, name, data)
-    TriggerClientEvent('kora_consumables:register', -1, {added[#added]})
+    upsertConsumable(class, name, data)
     return true, 'success'
 end
 

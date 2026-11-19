@@ -5,7 +5,7 @@ sidebar_position: 3
 
 # In-game consumable creator
 
-The command `/consumableCreator` opens the creator for players allowed by the `command` ACE permission. It saves entries to `kora_consumables_items`; the database is loaded before useable handlers are registered. Existing configured consumables are copied into the database on the first start. Database records become authoritative after seeding.
+The command `/consumableCreator` opens the creator for players with Kora admin permission. It is registered through `Kora.commands.add`, and both the command and its callbacks require the `admin` level through `Kora.permissions.hasLevel`. This accepts `kora_core.admin` or `group.admin`; a `god` level also qualifies. The schema ships explicit item and class seed rows for fresh installs. The database loads before useable handlers are registered and is authoritative afterwards.
 
 The sidebar has separate **Create Item** and **Create Class** pages. On **Create Item**, choose a class, then search the `kora_core` shared item catalog by item name or display label. Images use each shared item's `imageUrl` when available, then fall back to the inventory CDN's `<item name>.webp` URL. Search results and saved consumables use those resolved URLs. The animation selector shows either an emote-name field or the animation-set fields for dictionary, clip, flag, and both props.
 

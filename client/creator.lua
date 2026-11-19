@@ -123,7 +123,7 @@ local function classFields(class, defaults)
     local disable = defaults.disable or {}
     local effects = defaults.effects or {}
     local movement = defaults.allowMovement
-    if movement == nil then movement = Config.allowMovement ~= false end
+    if movement == nil then movement = true end
     local animationMode = defaults.emote and 'emote' or (animation.dict or animation.clip) and 'animation' or 'emote'
     local fields = {}
     if not class then fields[#fields + 1] = {id = 'class', label = 'Class key (lowercase)', type = 'text', required = true} end

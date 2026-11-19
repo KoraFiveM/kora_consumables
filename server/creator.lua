@@ -1,5 +1,7 @@
 local visuals = {none = true, buzzed = true, alien = true, coke = true, crack = true, meth = true, trevor = true}
 local ITEM_IMAGE_CDN = 'https://cdn.koraframe.work/inventory'
+local CREATOR_LEVELS = {'god', 'admin', 'mod', 'user'}
+local CREATOR_PERMISSION_OPTIONS = {prefix = 'kora_core'}
 
 local function itemArtwork(item)
     local candidates = {item.image, item.imageUrl}
@@ -15,7 +17,8 @@ local function itemArtwork(item)
 end
 
 local function admin(src)
-    return src == 0 or IsPlayerAceAllowed(src, 'command')
+    return type(src) == 'number' and src > 0
+        and Kora.permissions.hasLevel(src, 'admin', CREATOR_LEVELS, CREATOR_PERMISSION_OPTIONS)
 end
 
 local function callback(name, handler)
@@ -172,10 +175,7 @@ callback('save', function(_, entry)
         local itemRegistered, itemError = exports.kora_core:registerShared('items', entry.item, data.sharedItem)
         if not itemRegistered then return nil, itemError or 'Could not register item in kora_core' end
     end
-    Config.Consumables[class] = Config.Consumables[class] or {}
-    Config.Consumables[class][entry.item] = data
-    registerUseable(class, entry.item, data)
-    TriggerClientEvent('kora_consumables:catalog', -1, Config.Consumables, Config.ConsumableClasses)
+    upsertConsumable(class, entry.item, data)
     return {entries = {{class = class, item = entry.item, data = data}}, items = allItems()}
 end)
 
@@ -184,7 +184,7 @@ callback('delete', function(_, class, item)
     local ok, err = DisableConsumable(class, item)
     if not ok then return nil, err end
     Config.Consumables[class][item] = nil
-    TriggerClientEvent('kora_consumables:catalog', -1, Config.Consumables, Config.ConsumableClasses)
+    syncConsumableCatalog()
     return true
 end)
 
@@ -260,7 +260,7 @@ callback('classSave', function(_, class, entry)
     local saved, err = SaveConsumableClass(class, data)
     if not saved then return nil, err end
     Config.ConsumableClasses[class] = data
-    TriggerClientEvent('kora_consumables:catalog', -1, Config.Consumables, Config.ConsumableClasses)
+    syncConsumableCatalog()
     return {classes = Config.ConsumableClasses}
 end)
 
@@ -271,12 +271,19 @@ callback('classDelete', function(_, class)
     local disabled, err = DisableConsumableClass(class)
     if not disabled then return nil, err end
     Config.ConsumableClasses[class] = nil
-    TriggerClientEvent('kora_consumables:catalog', -1, Config.Consumables, Config.ConsumableClasses)
+    syncConsumableCatalog()
     return true
 end)
 
 local command = Config.CreatorCommand or 'consumableCreator'
-RegisterCommand(command, function(src)
-    if src == 0 or not admin(src) then return end
+Kora.commands.add(command, 'Open the consumables creator', nil, false, function(src)
+    if src == 0 then return end
     TriggerClientEvent('kora_consumables:creator:open', src)
-end, false)
+end, {
+    permission = 'admin',
+    checkPermission = function(src, permission)
+        return type(src) == 'number' and src > 0
+            and Kora.permissions.hasLevel(src, permission, CREATOR_LEVELS, CREATOR_PERMISSION_OPTIONS)
+    end,
+    resource = GetCurrentResourceName(),
+})

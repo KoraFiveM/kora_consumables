@@ -63,13 +63,13 @@ Kora Consumables makes food, drink, liquor and smoke items usable. The player ho
 - The server creates/loads the database catalog before calling `createUseable` for each active consumable.
 - When `kora_inventory` starts (or restarts) after this resource, the `onResourceStart` handler in `server/server.lua` calls `registerUseables()` again, because the inventory's own built-in handlers would otherwise replace ours.
 - The client asks for the active database catalog as it starts; the server sends it to every joining client.
-- A full item configuration is merged at load by `ApplyConsumableDefaults` (see Configuration). Edits to `shared/Config.lua` need a resource restart.
+- The item and class catalogs load from SQL at startup. Restart the resource after changing resource-wide options in `shared/Config.lua`.
 
 ## Things that surprise people
 
-- `/consumableCreator` opens the in-game editor for players granted the `command` ACE permission. Everything else starts from using an item in the inventory.
+- `/consumableCreator` opens the in-game editor for Kora admins (`kora_core.admin` or `group.admin`; `god` also qualifies). Everything else starts from using an item in the inventory.
 - The only exports are the four legacy ones documented here. They are registered under `exports.kora_consumables` and also under `exports['qb-smallresources']`.
-- In `shared/Config.lua` the liquor keys are `beer_pisswaser3` and `beer_pisswaser4`, matching the item names in `items/items.md`.
+- The shipped liquor entries include `beer_pisswaser3` and `beer_pisswaser4`, matching the item names in `items/items.md`.
 
 ## Requirements
 
@@ -86,6 +86,6 @@ The `kora_consumables_items` table stores class, item key, complete configuratio
 
 ## Commands
 
-`/consumableCreator` opens the in-game creator. It requires the `command` ACE permission.
+`/consumableCreator` opens the in-game creator. It requires Kora admin permission through `Kora.permissions.hasLevel` (`kora_core.admin` or `group.admin`; `god` also qualifies).
 
 See [Items](./items.md) for the default consumables and how to add new ones.

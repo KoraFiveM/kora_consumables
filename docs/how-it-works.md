@@ -7,11 +7,14 @@ sidebar_position: 6
 
 ## Startup
 
-1. `shared/Config.lua` defines the `Config` table and the configured consumables.
-2. `shared/deafaults.lua` (the filename is misspelled in the repo) fills missing fields for each configured item from its class defaults. It also declares `Config.applyStatusOn` as a live kora_lib config enum and registers the whole `Config` with `Kora.config.adopt`.
-3. The server registers each configured item with `exports.kora_core:createUseable`. Before that, it registers a `cigarette` shared item if no resource has defined one.
-4. `kora_inventory` has its own instant handlers for some of the same items, such as `water_bottle`, `sandwich` and `beer`. To keep this resource's handlers active, the server registers all useables again whenever `kora_inventory` starts.
-5. When the client script starts, it sends `kora_consumables:sync` to the server. The server replies with any items that other resources added at runtime through the [exports](./api/server-exports.md).
+1. `shared/Config.lua` defines resource-wide behavior settings and initializes empty runtime catalog tables.
+2. `server/schema.lua` declares the item and class tables and includes the shipped catalog as explicit seed rows.
+3. `server/data.lua` asks `kora_sql` to create the tables, loads the database rows, fills locale-based class labels and applies class defaults. The database is authoritative after seeding.
+4. The server registers every active database item with `exports.kora_core:createUseable`. Before that, it registers a `cigarette` shared item if no resource has defined one.
+5. `kora_inventory` has its own instant handlers for some of the same items, such as `water_bottle`, `sandwich` and `beer`. To keep this resource's handlers active, the server registers all useables again whenever `kora_inventory` starts.
+6. When the client starts, it requests the active database catalog. The server sends the same catalog to clients when creator edits are saved or another resource adds an item through the [exports](./api/server-exports.md).
+
+When an item is created or edited, the server saves it to SQL, updates its in-memory row, registers a fresh usable handler with Kora Core, and broadcasts the current item and class catalog to every client.
 
 ## Using an item
 
@@ -20,7 +23,7 @@ When a player uses a configured item from the inventory:
 1. The server checks whether the player already has a use in progress. If so, it ignores the new use and the useable callback returns `false`.
 2. With `applyStatusOn = 'complete'` (default):
    1. The server triggers the client callback `kora_consumables:progress` with the payload `{ class, item }` and waits for the result.
-   2. The client looks up the item config. It drops the prop if its model is invalid (see `skipInvalidProps`). It applies the movement rules and starts `Kora.progressbar.start` with the label, duration, animation, prop, `disable` flags, `canCancel`, `useWhileDead` and `emote`.
+   2. The client looks up the item in its synchronized database catalog. It drops the prop if its model is invalid (see `skipInvalidProps`). It applies the movement rules and starts `Kora.progressbar.start` with the label, duration, animation, prop, `disable` flags, `canCancel`, `useWhileDead` and `emote`.
    3. If the player finishes the bar, the client starts the item's screen effect, if any, and returns `true`. If the player cancels or the progress bar fails, it returns `false`.
    4. If the result is not `true`, nothing happens: the item is kept and no status is applied.
    5. The server also checks timing. If the result arrived sooner than the item's `duration` (default `1000` ms) minus 250 ms, the use is ignored and a line is printed to the server console.
@@ -44,7 +47,7 @@ If the item has an `event` field, the server sends that client event to the play
 On the client, movement rules are resolved in this order:
 
 1. The item's own `allowMovement` (`true` or `false`), if set.
-2. `Config.allowMovement`: a boolean, or a table keyed by class, where a missing class counts as `true`.
+2. The database class's `allowMovement`, if set.
 3. If neither is set, movement is allowed.
 
 When movement is allowed, `disable.move` is changed to `false` for that use. Flags 16 (upper body) and 32 (player control) are added to the animation flag, with a base of `1` if the animation has no flag. Combat and vehicle restrictions are not changed. A `disable.vehicle` value is also copied to `disable.car` for the progress bar.
@@ -63,4 +66,4 @@ When the bar finishes, the client starts the item's `effects` according to `effe
 
 ## Label
 
-If an item has no `label`, it uses the class prefix (`Drinking `, `Eating `, `Smoking `, `Using `) followed by the item's shared-item label. The client may load this resource before its `kora_core` item registry is ready, so the label is completed again when the item is used.
+If an item has no `label`, the server uses its locale-aware class label followed by the item's shared-item label before syncing the catalog. The client can also complete a prefix label when its `kora_core` item registry becomes available.

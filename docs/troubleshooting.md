@@ -24,7 +24,7 @@ Each player can only have one consumable use in progress. Wait for the current p
 ## The prop is missing or in the wrong place
 
 - Set `Config.Debug = true` to print a line when a prop is skipped because its model is not valid.
-- Adjust `offset`/`rotation` per item, or change `Config.propHand`/`Config.propBone`. See [Configuration](./api/configuration.md#props). These are read at resource start, so restart the resource after changing them.
+- Adjust `offset`, `rotation` or bone in the creator's item or class editor. Changes are saved to SQL and synchronize to clients.
 
 ## Drunk effect or notification is unwanted
 
@@ -32,4 +32,4 @@ Set `Config.DrunkWalk = false` and/or `Config.DrunkNotify = false`. To remove th
 
 ## Items added with the exports disappear
 
-Runtime additions are kept only in memory. Call the exports again whenever the calling resource starts, or add the items to `Config.Consumables`.
+Creator and export additions are saved in SQL. Confirm the matching item row is enabled and the shared item exists.

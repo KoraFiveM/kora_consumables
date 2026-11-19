@@ -90,6 +90,7 @@ CreateThread(function()
         else
             local decodedOk, data = pcall(json.decode, row.data or '{}')
             if decodedOk and type(data) == 'table' then
+                if not data.label then data.label = ConsumableClassLabel(row.class) end
                 local classData = Config.ConsumableClasses[row.class] or {}
                 for key, value in pairs(data) do classData[key] = value end
                 Config.ConsumableClasses[row.class] = classData

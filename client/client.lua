@@ -71,8 +71,7 @@ local function usableProp(prop, item)
     return nil
 end
 
--- Whether the player may walk while using this item: a per-item allowMovement wins,
--- then Config.allowMovement (boolean, or a table keyed by class), default true.
+-- Whether the player may walk while using this item: item setting, then database class setting, default true.
 local function movementAllowed(itemData, class)
     if itemData.allowMovement ~= nil then
         return itemData.allowMovement == true
@@ -81,11 +80,7 @@ local function movementAllowed(itemData, class)
     if classDefaults and classDefaults.allowMovement ~= nil then
         return classDefaults.allowMovement == true
     end
-    local setting = Config.allowMovement
-    if type(setting) == 'table' then
-        setting = setting[class]
-    end
-    return setting ~= false
+    return true
 end
 
 -- Upper-body (16) + allow player control (32) keep the legs free; flag 0/1 would lock the body.

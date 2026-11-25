@@ -7,10 +7,11 @@
       "client/creator.lua"
     ],
     "server": [
-      "server/schema.lua",
+      "kora_versioncheck.lua",
+      "server/creator.lua",
       "server/data.lua",
-      "server/server.lua",
-      "server/creator.lua"
+      "server/schema.lua",
+      "server/server.lua"
     ],
     "shared": [
       "shared/Config.lua",
